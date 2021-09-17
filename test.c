@@ -1,55 +1,56 @@
- #define _GNU_SOURCE
+#define _GNU_SOURCE
 #include <linux/if_packet.h>
 #include <net/if.h>
-#include <netinet/in.h>
-#include <sys/uio.h>
 #include <string.h>
 #include <arpa/inet.h>
 #include <netinet/ether.h>
-#include <netinet/ip.h>
 #include <sys/ioctl.h>
-#include <net/ethernet.h>
 #include <sys/socket.h>
-#include <sys/types.h>
 #include <stdio.h>
 #include <errno.h>
 #include <stdlib.h>
+#include <unistd.h>
 
 #define ROWS 64
 #define COLS 32
 
 static int fd;
-static struct mmsghdr msgs[ROWS + 2];
 static unsigned char buffer[ROWS][COLS][3];
 
-void fill(uint8_t red, uint8_t blue, uint8_t green) {
+static void map(uint8_t *x, uint8_t *y) {
+	uint8_t x2 = *x % COLS;
+	uint8_t y2 = (*x / COLS * 16) + (*y % 16);
+	*x = x2;
+	*y = y2;
+}
+
+static void set_pixel(uint8_t x, uint8_t y, uint8_t red, uint8_t blue, uint8_t green) {
+	map(&x, &y);
+    	buffer[y % ROWS][x % COLS][0] = blue;
+    	buffer[y % ROWS][x % COLS][1] = green;
+    	buffer[y % ROWS][x % COLS][2] = red;
+}
+
+static void fill(uint8_t red, uint8_t blue, uint8_t green) {
 	int x, y;
     	for (x = 0; x < COLS; x++) {
     		for (y = 0; y < ROWS; y++) {
-    			buffer[y][x][0] = blue;
-    			buffer[y][x][1] = green;
-    			buffer[y][x][2] = red;
+		    	buffer[y][x][0] = blue;
+		    	buffer[y][x][1] = green;
+		    	buffer[y][x][2] = red;
     		}
     	}
 }
 
-int send_frame() {
-	if (sendmmsg(fd, msgs, ROWS + 2, 0) != ROWS + 2) {
-		printf("error no= %d, ERROR = %s \n",errno,strerror(errno));
-    		return -1;
-    	}
-    	
-    	return 0;
-}
-
-int init(char *iface) {
-	struct ifreq if_idx;
-	struct sockaddr_ll sock_addr;
+static int send_frame() {
+	struct mmsghdr msgs[ROWS + 2];
 	struct iovec iovecs[(2 * ROWS) + 2];
 	struct ether_header *header;
-	unsigned dhost[] = { 0x11, 0x22, 0x33, 0x44, 0x55, 0x66 };
 	unsigned char *ptr;
 	int x;
+	
+	memset(msgs, 0, sizeof(msgs));
+	memset(iovecs, 0, sizeof(iovecs));
 	
 	ptr = (unsigned char *) malloc(112);
 	iovecs[0].iov_base = ptr;
@@ -132,16 +133,29 @@ int init(char *iface) {
 		msgs[x].msg_hdr.msg_iovlen = 2;
 	}
 	
+	if (sendmmsg(fd, msgs, ROWS + 2, 0) != ROWS + 2) {
+		printf("error no= %d, ERROR = %s \n",errno,strerror(errno));
+		return 1;
+	}
+
+	return 0;
+}
+
+int init(const char *iface) {
+	struct ifreq if_idx;
+	struct sockaddr_ll sock_addr;
+	unsigned dhost[] = { 0x11, 0x22, 0x33, 0x44, 0x55, 0x66 };
+	
 	if ((fd = socket(AF_PACKET, SOCK_RAW, IPPROTO_RAW)) == -1) {
 		printf("error no= %d, ERROR = %s \n",errno,strerror(errno));
-		return -2;
+		return 1;
 	}
 	
 	memset(&if_idx, 0, sizeof(struct ifreq));
 	strcpy(if_idx.ifr_name, iface);
 	if (ioctl(fd, SIOCGIFINDEX, &if_idx) < 0) {
 		printf("error no= %d, ERROR = %s \n",errno,strerror(errno));
-		return -3;
+		return 2;
 	}
 	
 	sock_addr.sll_family = AF_PACKET;
@@ -150,19 +164,21 @@ int init(char *iface) {
 	memcpy(sock_addr.sll_addr, dhost, 6);
 
 	if (bind(fd, (struct sockaddr *) &sock_addr, sizeof(sock_addr)) == -1) {
+		close(fd);
 		printf("error no= %d, ERROR = %s \n",errno,strerror(errno));
-        	return -4;
+        	return 3;
     	}
-    	
-    	memset(buffer, 0, ROWS * COLS * 3);
-
-	return send_frame();
 }
 
 int main(int argc, char **argv) {
 	uint8_t x = 0;
 	
 	init("ens33");
+	
+	//fill(0xF, 0xFF, 0xFF);
+	//set_pixel(argc, argc, 0xFF, 0xF, 0xFF);
+	//set_pixel(63, 0, 0, 0xFF, 0);
+	//send_frame();
 	
 	while(1) {
 		fill(x, x, x);
