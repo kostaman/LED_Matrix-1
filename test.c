@@ -134,14 +134,14 @@ int init(char *iface) {
 	
 	if ((fd = socket(AF_PACKET, SOCK_RAW, IPPROTO_RAW)) == -1) {
 		printf("error no= %d, ERROR = %s \n",errno,strerror(errno));
-		return -1;
+		return -2;
 	}
 	
 	memset(&if_idx, 0, sizeof(struct ifreq));
 	strcpy(if_idx.ifr_name, iface);
 	if (ioctl(fd, SIOCGIFINDEX, &if_idx) < 0) {
 		printf("error no= %d, ERROR = %s \n",errno,strerror(errno));
-		return -2;
+		return -3;
 	}
 	
 	sock_addr.sll_family = AF_PACKET;
@@ -151,7 +151,7 @@ int init(char *iface) {
 
 	if (bind(fd, (struct sockaddr *) &sock_addr, sizeof(sock_addr)) == -1) {
 		printf("error no= %d, ERROR = %s \n",errno,strerror(errno));
-        	return -3;
+        	return -4;
     	}
     	
     	memset(buffer, 0, ROWS * COLS * 3);
