@@ -4,7 +4,9 @@ LED Matrix Driver based on [Colorlight 5A-75B](http://www.colorlight-led.com/pro
 
 Firmware images are products of ColorLight and I am just saving them off. They are exactly the same as the ones provided by [LEDUpgrade 3.6](https://www.colorlightinside.com/Products/Software/37_143.html). Configuration files were produced by [LEDVision 8.0](https://www.colorlightinside.com/Products/Software/37_31.html).
 
-Current logic builds 16x128 LED Matrix, however configuration of Receiver card is 64x32 for performance reasons. The receiver card supports:
+Current logic builds 16x128 LED Matrix, however configuration of Receiver card is 64x32 for performance reasons. This is easily corrected with a simple mapper function. Honestly I would not expect this to have been supported. These are well designed to support signage market, which provides functionality that can be used here.
+
+The receiver card supports:
 - gamma correction
 - memory map
 - current gain (depending on panel)
@@ -23,4 +25,6 @@ Current logic builds 16x128 LED Matrix, however configuration of Receiver card i
 
 Linux logic uses IO vectors in scatter gather configuration to support high performance, lower memory usage, and streamlined interface. Rough performance estimates show PC as very high performance. Pi has good performance but may struggle in certain applications. Pi 2 is about 2.75 times faster than Pi.
 
-Further areas of expansion include PoE and VLAN support.
+Further areas of expansion include PoE and VLAN support. Creating C++ class may also be considered. This logic should be portable into many different languages, frameworks and APIs. However complete reimplementation is also possible and fairly straight forward. PoE and VLAN have priority.
+
+VLAN enables channels via PoE switch which would enable a number of different applications using COTS solutions. Receiver cards also support chaining as an option.
