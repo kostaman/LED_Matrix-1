@@ -18,18 +18,38 @@
 #define ROWS 64
 #define COLS 32
 
-unsigned dhost[] = { 0x11, 0x22, 0x33, 0x44, 0x55, 0x66 };
+static int fd;
+static struct mmsghdr msgs[ROWS + 2];
+static unsigned char buffer[ROWS][COLS][3];
 
-int main(int argc, char **argv) {
+void fill(uint8_t red, uint8_t blue, uint8_t green) {
+	int x, y;
+    	for (x = 0; x < COLS; x++) {
+    		for (y = 0; y < ROWS; y++) {
+    			buffer[y][x][0] = blue;
+    			buffer[y][x][1] = green;
+    			buffer[y][x][2] = red;
+    		}
+    	}
+}
+
+int send_frame() {
+	if (sendmmsg(fd, msgs, ROWS + 2, 0) != ROWS + 2) {
+		printf("error no= %d, ERROR = %s \n",errno,strerror(errno));
+    		return -1;
+    	}
+    	
+    	return 0;
+}
+
+int init(char *iface) {
 	struct ifreq if_idx;
 	struct sockaddr_ll sock_addr;
-	struct mmsghdr msgs[ROWS + 2];
 	struct iovec iovecs[(2 * ROWS) + 2];
 	struct ether_header *header;
-	unsigned char buffer[ROWS][COLS][3];
-	char iface[] = "ens33";
+	unsigned dhost[] = { 0x11, 0x22, 0x33, 0x44, 0x55, 0x66 };
 	unsigned char *ptr;
-	int fd, x, y;
+	int x;
 	
 	ptr = (unsigned char *) malloc(112);
 	iovecs[0].iov_base = ptr;
@@ -134,18 +154,21 @@ int main(int argc, char **argv) {
         	return -3;
     	}
     	
-    	for (x = 0; x < COLS; x++) {
-    		for (y = 0; y < ROWS; y++) {
-    			buffer[y][x][0] = 0xFF;
-    			buffer[y][x][1] = 0xFF;
-    			buffer[y][x][2] = 0xFF;
-    		}
-    	}
-    	
-    	if (sendmmsg(fd, msgs, ROWS + 2, 0) != ROWS + 2) {
-		printf("error no= %d, ERROR = %s \n",errno,strerror(errno));
-    		return -4;
-    	}
+    	memset(buffer, 0, ROWS * COLS * 3);
 
+	return send_frame();
+}
+
+int main(int argc, char **argv) {
+	uint8_t x = 0;
+	
+	init("ens33");
+	
+	while(1) {
+		fill(x, x, x);
+		send_frame();
+		x++;
+	}
+	
 	return 0;
 }
