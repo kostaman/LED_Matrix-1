@@ -149,6 +149,119 @@ static int send_frame() {
 	return 0;
 }
 
+static int send_frame_vlan(uint16_t id) {
+	struct mmsghdr msgs[ROWS + 2];
+	struct iovec iovecs[(2 * ROWS) + 2];
+	struct ether_header *header;
+	unsigned char *ptr;
+	int x;
+	
+	id &= 0xFFF;
+	
+	memset(msgs, 0, sizeof(msgs));
+	memset(iovecs, 0, sizeof(iovecs));
+	
+	ptr = (unsigned char *) malloc(116);
+	iovecs[0].iov_base = ptr;
+	iovecs[0].iov_len = 116;
+	memset(ptr, 0, 116);
+	header = (struct ether_header *) ptr;
+	header->ether_type = htons(0x8100);
+	header->ether_shost[0] = 0x22;
+	header->ether_shost[1] = 0x22;
+	header->ether_shost[2] = 0x33;
+	header->ether_shost[3] = 0x44;
+	header->ether_shost[4] = 0x55;
+	header->ether_shost[5] = 0x66;
+	header->ether_dhost[0] = 0x11;
+	header->ether_dhost[1] = 0x22;
+	header->ether_dhost[2] = 0x33;
+	header->ether_dhost[3] = 0x44;
+	header->ether_dhost[4] = 0x55;
+	header->ether_dhost[5] = 0x66;
+	ptr[sizeof(struct ether_header) + 0] = (0xE << 4) | (id >> 8);
+	ptr[sizeof(struct ether_header) + 1] = id & 0xFF;
+	ptr[sizeof(struct ether_header) + 2] = htons(0x0107) & 0xFF;
+	ptr[sizeof(struct ether_header) + 3] = htons(0x0107) >> 8;
+	ptr[sizeof(struct ether_header) + 25] = 0xFF;
+	ptr[sizeof(struct ether_header) + 26] = 0x05;
+	ptr[sizeof(struct ether_header) + 28] = 0xFF;
+	ptr[sizeof(struct ether_header) + 29] = 0xFF;
+	ptr[sizeof(struct ether_header) + 30] = 0xFF;
+	msgs[ROWS].msg_hdr.msg_iov = &iovecs[0];
+	msgs[ROWS].msg_hdr.msg_iovlen = 1;
+	
+	ptr = (unsigned char *) malloc(81);
+	iovecs[1].iov_base = ptr;
+	iovecs[1].iov_len = 81;
+	memset(ptr, 0, 81);
+	header = (struct ether_header *) ptr;
+	header->ether_type = htons(0x8100);
+	header->ether_shost[0] = 0x22;
+	header->ether_shost[1] = 0x22;
+	header->ether_shost[2] = 0x33;
+	header->ether_shost[3] = 0x44;
+	header->ether_shost[4] = 0x55;
+	header->ether_shost[5] = 0x66;
+	header->ether_dhost[0] = 0x11;
+	header->ether_dhost[1] = 0x22;
+	header->ether_dhost[2] = 0x33;
+	header->ether_dhost[3] = 0x44;
+	header->ether_dhost[4] = 0x55;
+	header->ether_dhost[5] = 0x66;
+	ptr[sizeof(struct ether_header) + 0] = (0xE << 4) | (id >> 8);
+	ptr[sizeof(struct ether_header) + 1] = id & 0xFF;
+	ptr[sizeof(struct ether_header) + 2] = htons(0x0AFF) & 0xFF;
+	ptr[sizeof(struct ether_header) + 3] = htons(0x0AFF) >> 8;
+	ptr[sizeof(struct ether_header) + 4] = 0xFF;
+	ptr[sizeof(struct ether_header) + 5] = 0xFF;
+	ptr[sizeof(struct ether_header) + 6] = 0xFF;
+	msgs[ROWS + 1].msg_hdr.msg_iov = &iovecs[1];
+	msgs[ROWS + 1].msg_hdr.msg_iovlen = 1;
+	
+	for (x = 0; x < ROWS; x++) {
+		ptr = (unsigned char *) malloc(sizeof(struct ether_header) + 11);
+		iovecs[x * 2 + 2].iov_base = ptr;
+		iovecs[x * 2 + 2].iov_len = sizeof(struct ether_header) + 11;
+		memset(ptr, 0, sizeof(struct ether_header) + 11);
+		header = (struct ether_header *) ptr;
+		header->ether_type = htons(0x8100);
+		header->ether_shost[0] = 0x22;
+		header->ether_shost[1] = 0x22;
+		header->ether_shost[2] = 0x33;
+		header->ether_shost[3] = 0x44;
+		header->ether_shost[4] = 0x55;
+		header->ether_shost[5] = 0x66;
+		header->ether_dhost[0] = 0x11;
+		header->ether_dhost[1] = 0x22;
+		header->ether_dhost[2] = 0x33;
+		header->ether_dhost[3] = 0x44;
+		header->ether_dhost[4] = 0x55;
+		header->ether_dhost[5] = 0x66;
+		ptr[sizeof(struct ether_header) + 0] = (0xE << 4) | (id >> 8);
+		ptr[sizeof(struct ether_header) + 1] = id & 0xFF;
+		ptr[sizeof(struct ether_header) + 2] = htons(0x5500) & 0xFF;
+		ptr[sizeof(struct ether_header) + 3] = htons(0x5500) >> 8;
+		ptr[sizeof(struct ether_header) + 5] = x >> 8;
+		ptr[sizeof(struct ether_header) + 4] = x & 0xFF;
+		ptr[sizeof(struct ether_header) + 7] = COLS >> 8;
+		ptr[sizeof(struct ether_header) + 8] = COLS & 0xFF;
+		ptr[sizeof(struct ether_header) + 9] = 0x08;
+		ptr[sizeof(struct ether_header) + 10] = 0x88;
+		iovecs[x * 2 + 3].iov_base = &buffer[x][0][0];
+		iovecs[x * 2 + 3].iov_len = COLS * 3;
+		msgs[x].msg_hdr.msg_iov = &iovecs[x * 2 + 2];
+		msgs[x].msg_hdr.msg_iovlen = 2;
+	}
+	
+	if (sendmmsg(fd, msgs, ROWS + 2, 0) != ROWS + 2) {
+		printf("error no= %d, ERROR = %s \n",errno,strerror(errno));
+		return 1;
+	}
+
+	return 0;
+}
+
 int init(const char *iface) {
 	struct ifreq if_idx;
 	struct sockaddr_ll sock_addr;
@@ -190,7 +303,7 @@ int main(int argc, char **argv) {
 	
 	while(1) {
 		fill(x, x, x);
-		send_frame();
+		send_frame_vlan(0x12);
 		x++;
 	}
 	
