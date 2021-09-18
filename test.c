@@ -46,6 +46,10 @@ static void fill(uint8_t red, uint8_t blue, uint8_t green) {
     	}
 }
 
+static void clear() {
+	fill(0, 0, 0);	
+}
+
 static int send_frame() {
 	struct mmsghdr msgs[ROWS + 2];
 	struct iovec iovecs[(2 * ROWS) + 2];
