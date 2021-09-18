@@ -1,3 +1,7 @@
+// Author: David Thacher
+// Date: 9/16/2021
+// License: GPL 3.0
+
 #define _GNU_SOURCE
 #include <linux/if_packet.h>
 #include <net/if.h>
