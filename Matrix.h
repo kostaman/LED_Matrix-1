@@ -43,8 +43,8 @@ namespace LED_Matrix {
 			Matrix_RGB_t *buffer;
 
 		private:
+			void send_frame(bool vlan, uint16_t vlan_id);
 	};
 }
 
 #endif	/* Matrix_H */
-
