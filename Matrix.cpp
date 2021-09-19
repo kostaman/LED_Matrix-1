@@ -98,7 +98,6 @@ void Matrix::send_frame(uint16_t vlan_id) {
 	send_frame(true, vlan_id);
 }
 
-
 void Matrix::send_frame(bool vlan, uint16_t id) {
 	uint32_t offset = 0;
 	struct mmsghdr msgs[rows + 2];
