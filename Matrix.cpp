@@ -13,7 +13,6 @@
 #include <netinet/ether.h>
 #include <sys/ioctl.h>
 #include <sys/socket.h>
-#include <stdio.h>
 #include <errno.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -76,6 +75,21 @@ void Matrix::clear() {
 	fill(Matrix_RGB_t(0, 0, 0));	
 }
 
+static void set_address(struct ether_header *header) {
+	header->ether_shost[0] = 0x22;
+	header->ether_shost[1] = 0x22;
+	header->ether_shost[2] = 0x33;
+	header->ether_shost[3] = 0x44;
+	header->ether_shost[4] = 0x55;
+	header->ether_shost[5] = 0x66;
+	header->ether_dhost[0] = 0x11;
+	header->ether_dhost[1] = 0x22;
+	header->ether_dhost[2] = 0x33;
+	header->ether_dhost[3] = 0x44;
+	header->ether_dhost[4] = 0x55;
+	header->ether_dhost[5] = 0x66;
+}
+
 void Matrix::send_frame() {
 	struct mmsghdr msgs[rows + 2];
 	struct iovec iovecs[(2 * rows) + 2];
@@ -92,18 +106,7 @@ void Matrix::send_frame() {
 	memset(ptr, 0, 112);
 	header = (struct ether_header *) ptr;
 	header->ether_type = htons(0x0107);
-	header->ether_shost[0] = 0x22;
-	header->ether_shost[1] = 0x22;
-	header->ether_shost[2] = 0x33;
-	header->ether_shost[3] = 0x44;
-	header->ether_shost[4] = 0x55;
-	header->ether_shost[5] = 0x66;
-	header->ether_dhost[0] = 0x11;
-	header->ether_dhost[1] = 0x22;
-	header->ether_dhost[2] = 0x33;
-	header->ether_dhost[3] = 0x44;
-	header->ether_dhost[4] = 0x55;
-	header->ether_dhost[5] = 0x66;
+	set_address(header);
 	ptr[sizeof(struct ether_header) + 21] = 0xFF;
 	ptr[sizeof(struct ether_header) + 22] = 0x05;
 	ptr[sizeof(struct ether_header) + 24] = 0xFF;
@@ -118,18 +121,7 @@ void Matrix::send_frame() {
 	memset(ptr, 0, 77);
 	header = (struct ether_header *) ptr;
 	header->ether_type = htons(0x0AFF);
-	header->ether_shost[0] = 0x22;
-	header->ether_shost[1] = 0x22;
-	header->ether_shost[2] = 0x33;
-	header->ether_shost[3] = 0x44;
-	header->ether_shost[4] = 0x55;
-	header->ether_shost[5] = 0x66;
-	header->ether_dhost[0] = 0x11;
-	header->ether_dhost[1] = 0x22;
-	header->ether_dhost[2] = 0x33;
-	header->ether_dhost[3] = 0x44;
-	header->ether_dhost[4] = 0x55;
-	header->ether_dhost[5] = 0x66;
+	set_address(header);
 	ptr[sizeof(struct ether_header) + 0] = 0xFF;
 	ptr[sizeof(struct ether_header) + 1] = 0xFF;
 	ptr[sizeof(struct ether_header) + 2] = 0xFF;
@@ -143,18 +135,7 @@ void Matrix::send_frame() {
 		memset(ptr, 0, sizeof(struct ether_header) + 7);
 		header = (struct ether_header *) ptr;
 		header->ether_type = htons(0x5500);
-		header->ether_shost[0] = 0x22;
-		header->ether_shost[1] = 0x22;
-		header->ether_shost[2] = 0x33;
-		header->ether_shost[3] = 0x44;
-		header->ether_shost[4] = 0x55;
-		header->ether_shost[5] = 0x66;
-		header->ether_dhost[0] = 0x11;
-		header->ether_dhost[1] = 0x22;
-		header->ether_dhost[2] = 0x33;
-		header->ether_dhost[3] = 0x44;
-		header->ether_dhost[4] = 0x55;
-		header->ether_dhost[5] = 0x66;
+		set_address(header);
 		ptr[sizeof(struct ether_header) + 1] = x >> 8;
 		ptr[sizeof(struct ether_header) + 0] = x & 0xFF;
 		ptr[sizeof(struct ether_header) + 3] = cols >> 8;
@@ -189,18 +170,7 @@ void Matrix::send_frame(uint16_t id) {
 	memset(ptr, 0, 116);
 	header = (struct ether_header *) ptr;
 	header->ether_type = htons(0x8100);
-	header->ether_shost[0] = 0x22;
-	header->ether_shost[1] = 0x22;
-	header->ether_shost[2] = 0x33;
-	header->ether_shost[3] = 0x44;
-	header->ether_shost[4] = 0x55;
-	header->ether_shost[5] = 0x66;
-	header->ether_dhost[0] = 0x11;
-	header->ether_dhost[1] = 0x22;
-	header->ether_dhost[2] = 0x33;
-	header->ether_dhost[3] = 0x44;
-	header->ether_dhost[4] = 0x55;
-	header->ether_dhost[5] = 0x66;
+	set_address(header);
 	ptr[sizeof(struct ether_header) + 0] = (0xE << 4) | (id >> 8);
 	ptr[sizeof(struct ether_header) + 1] = id & 0xFF;
 	ptr[sizeof(struct ether_header) + 2] = htons(0x0107) & 0xFF;
@@ -219,18 +189,7 @@ void Matrix::send_frame(uint16_t id) {
 	memset(ptr, 0, 81);
 	header = (struct ether_header *) ptr;
 	header->ether_type = htons(0x8100);
-	header->ether_shost[0] = 0x22;
-	header->ether_shost[1] = 0x22;
-	header->ether_shost[2] = 0x33;
-	header->ether_shost[3] = 0x44;
-	header->ether_shost[4] = 0x55;
-	header->ether_shost[5] = 0x66;
-	header->ether_dhost[0] = 0x11;
-	header->ether_dhost[1] = 0x22;
-	header->ether_dhost[2] = 0x33;
-	header->ether_dhost[3] = 0x44;
-	header->ether_dhost[4] = 0x55;
-	header->ether_dhost[5] = 0x66;
+	set_address(header);
 	ptr[sizeof(struct ether_header) + 0] = (0xE << 4) | (id >> 8);
 	ptr[sizeof(struct ether_header) + 1] = id & 0xFF;
 	ptr[sizeof(struct ether_header) + 2] = htons(0x0AFF) & 0xFF;
@@ -248,18 +207,7 @@ void Matrix::send_frame(uint16_t id) {
 		memset(ptr, 0, sizeof(struct ether_header) + 11);
 		header = (struct ether_header *) ptr;
 		header->ether_type = htons(0x8100);
-		header->ether_shost[0] = 0x22;
-		header->ether_shost[1] = 0x22;
-		header->ether_shost[2] = 0x33;
-		header->ether_shost[3] = 0x44;
-		header->ether_shost[4] = 0x55;
-		header->ether_shost[5] = 0x66;
-		header->ether_dhost[0] = 0x11;
-		header->ether_dhost[1] = 0x22;
-		header->ether_dhost[2] = 0x33;
-		header->ether_dhost[3] = 0x44;
-		header->ether_dhost[4] = 0x55;
-		header->ether_dhost[5] = 0x66;
+		set_address(header);
 		ptr[sizeof(struct ether_header) + 0] = (0xE << 4) | (id >> 8);
 		ptr[sizeof(struct ether_header) + 1] = id & 0xFF;
 		ptr[sizeof(struct ether_header) + 2] = htons(0x5500) & 0xFF;
