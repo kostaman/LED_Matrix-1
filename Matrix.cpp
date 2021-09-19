@@ -59,24 +59,24 @@ inline void Matrix::map(uint32_t *x, uint32_t *y) {
 	*y = y2;
 }
 
-inline void Matrix::set_pixel(uint32_t x, uint32_t y, Matrix_RGB_t pixel) {
+void Matrix::set_pixel(uint32_t x, uint32_t y, Matrix_RGB_t pixel) {
 	map(&x, &y);
 	y %= rows;
 	x %= cols;
     	*(buffer + (y * cols) + x) = pixel;
 }
 
-inline void Matrix::fill(Matrix_RGB_t pixel) {
+void Matrix::fill(Matrix_RGB_t pixel) {
     	for (uint32_t x = 0; x < cols; x++)
     		for (uint32_t y = 0; y < rows; y++)
     			*(buffer + (y * cols) + x) = pixel;
 }
 
-inline void Matrix::clear() {
+void Matrix::clear() {
 	fill(Matrix_RGB_t(0, 0, 0));	
 }
 
-inline void Matrix::send_frame() {
+void Matrix::send_frame() {
 	struct mmsghdr msgs[rows + 2];
 	struct iovec iovecs[(2 * rows) + 2];
 	struct ether_header *header;
@@ -171,7 +171,7 @@ inline void Matrix::send_frame() {
 		throw errno;
 }
 
-inline void Matrix::send_frame(uint16_t id) {
+void Matrix::send_frame(uint16_t id) {
 	struct mmsghdr msgs[rows + 2];
 	struct iovec iovecs[(2 * rows) + 2];
 	struct ether_header *header;
