@@ -91,68 +91,16 @@ static void set_address(struct ether_header *header) {
 }
 
 void Matrix::send_frame() {
-	struct mmsghdr msgs[rows + 2];
-	struct iovec iovecs[(2 * rows) + 2];
-	struct ether_header *header;
-	unsigned char *ptr;
-	int x;
-	
-	memset(msgs, 0, sizeof(msgs));
-	memset(iovecs, 0, sizeof(iovecs));
-	
-	ptr = (unsigned char *) malloc(112);
-	iovecs[0].iov_base = ptr;
-	iovecs[0].iov_len = 112;
-	memset(ptr, 0, 112);
-	header = (struct ether_header *) ptr;
-	header->ether_type = htons(0x0107);
-	set_address(header);
-	ptr[sizeof(struct ether_header) + 21] = 0xFF;
-	ptr[sizeof(struct ether_header) + 22] = 0x05;
-	ptr[sizeof(struct ether_header) + 24] = 0xFF;
-	ptr[sizeof(struct ether_header) + 25] = 0xFF;
-	ptr[sizeof(struct ether_header) + 26] = 0xFF;
-	msgs[rows].msg_hdr.msg_iov = &iovecs[0];
-	msgs[rows].msg_hdr.msg_iovlen = 1;
-	
-	ptr = (unsigned char *) malloc(77);
-	iovecs[1].iov_base = ptr;
-	iovecs[1].iov_len = 77;
-	memset(ptr, 0, 77);
-	header = (struct ether_header *) ptr;
-	header->ether_type = htons(0x0AFF);
-	set_address(header);
-	ptr[sizeof(struct ether_header) + 0] = 0xFF;
-	ptr[sizeof(struct ether_header) + 1] = 0xFF;
-	ptr[sizeof(struct ether_header) + 2] = 0xFF;
-	msgs[rows + 1].msg_hdr.msg_iov = &iovecs[1];
-	msgs[rows + 1].msg_hdr.msg_iovlen = 1;
-	
-	for (x = 0; x < rows; x++) {
-		ptr = (unsigned char *) malloc(sizeof(struct ether_header) + 7);
-		iovecs[x * 2 + 2].iov_base = ptr;
-		iovecs[x * 2 + 2].iov_len = sizeof(struct ether_header) + 7;
-		memset(ptr, 0, sizeof(struct ether_header) + 7);
-		header = (struct ether_header *) ptr;
-		header->ether_type = htons(0x5500);
-		set_address(header);
-		ptr[sizeof(struct ether_header) + 1] = x >> 8;
-		ptr[sizeof(struct ether_header) + 0] = x & 0xFF;
-		ptr[sizeof(struct ether_header) + 3] = cols >> 8;
-		ptr[sizeof(struct ether_header) + 4] = cols & 0xFF;
-		ptr[sizeof(struct ether_header) + 5] = 0x08;
-		ptr[sizeof(struct ether_header) + 6] = 0x88;
-		iovecs[x * 2 + 3].iov_base = (buffer + (x * cols));
-		iovecs[x * 2 + 3].iov_len = cols * sizeof(Matrix_RGB_t);
-		msgs[x].msg_hdr.msg_iov = &iovecs[x * 2 + 2];
-		msgs[x].msg_hdr.msg_iovlen = 2;
-	}
-	
-	if (sendmmsg(fd, msgs, rows + 2, 0) != rows + 2)
-		throw errno;
+	send_frame(false, 0);
 }
 
-void Matrix::send_frame(uint16_t id) {
+void Matrix::send_frame(uint16_t vlan_id) {
+	send_frame(true, vlan_id);
+}
+
+
+void Matrix::send_frame(bool vlan, uint16_t id) {
+	uint32_t offset = 0;
 	struct mmsghdr msgs[rows + 2];
 	struct iovec iovecs[(2 * rows) + 2];
 	struct ether_header *header;
@@ -160,64 +108,81 @@ void Matrix::send_frame(uint16_t id) {
 	int x;
 	
 	id &= 0xFFF;
+	if (vlan)
+		offset = 4;
 	
 	memset(msgs, 0, sizeof(msgs));
 	memset(iovecs, 0, sizeof(iovecs));
 	
-	ptr = (unsigned char *) malloc(116);
+	ptr = (unsigned char *) malloc(112 + offset);
 	iovecs[0].iov_base = ptr;
-	iovecs[0].iov_len = 116;
-	memset(ptr, 0, 116);
+	iovecs[0].iov_len = 112 + offset;
+	memset(ptr, 0, 112 + offset);
 	header = (struct ether_header *) ptr;
-	header->ether_type = htons(0x8100);
+	if (!vlan)
+		header->ether_type = htons(0x0107);
+	else
+		header->ether_type = htons(0x8100);
 	set_address(header);
-	ptr[sizeof(struct ether_header) + 0] = (0xE << 4) | (id >> 8);
-	ptr[sizeof(struct ether_header) + 1] = id & 0xFF;
-	ptr[sizeof(struct ether_header) + 2] = htons(0x0107) & 0xFF;
-	ptr[sizeof(struct ether_header) + 3] = htons(0x0107) >> 8;
-	ptr[sizeof(struct ether_header) + 25] = 0xFF;
-	ptr[sizeof(struct ether_header) + 26] = 0x05;
-	ptr[sizeof(struct ether_header) + 28] = 0xFF;
-	ptr[sizeof(struct ether_header) + 29] = 0xFF;
-	ptr[sizeof(struct ether_header) + 30] = 0xFF;
+	if (vlan) {
+		ptr[sizeof(struct ether_header) + 0] = (0xE << 4) | (id >> 8);
+		ptr[sizeof(struct ether_header) + 1] = id & 0xFF;
+		ptr[sizeof(struct ether_header) + 2] = htons(0x0107) & 0xFF;
+		ptr[sizeof(struct ether_header) + 3] = htons(0x0107) >> 8;
+	}
+	ptr[sizeof(struct ether_header) + 21 + offset] = 0xFF;
+	ptr[sizeof(struct ether_header) + 22 + offset] = 0x05;
+	ptr[sizeof(struct ether_header) + 24 + offset] = 0xFF;
+	ptr[sizeof(struct ether_header) + 25 + offset] = 0xFF;
+	ptr[sizeof(struct ether_header) + 26 + offset] = 0xFF;
 	msgs[rows].msg_hdr.msg_iov = &iovecs[0];
 	msgs[rows].msg_hdr.msg_iovlen = 1;
 	
-	ptr = (unsigned char *) malloc(81);
+	ptr = (unsigned char *) malloc(77 + offset);
 	iovecs[1].iov_base = ptr;
-	iovecs[1].iov_len = 81;
-	memset(ptr, 0, 81);
+	iovecs[1].iov_len = 77 + offset;
+	memset(ptr, 0, 77 + offset);
 	header = (struct ether_header *) ptr;
-	header->ether_type = htons(0x8100);
+	if (!vlan)
+		header->ether_type = htons(0x0AFF);
+	else
+		header->ether_type = htons(0x8100);
 	set_address(header);
-	ptr[sizeof(struct ether_header) + 0] = (0xE << 4) | (id >> 8);
-	ptr[sizeof(struct ether_header) + 1] = id & 0xFF;
-	ptr[sizeof(struct ether_header) + 2] = htons(0x0AFF) & 0xFF;
-	ptr[sizeof(struct ether_header) + 3] = htons(0x0AFF) >> 8;
-	ptr[sizeof(struct ether_header) + 4] = 0xFF;
-	ptr[sizeof(struct ether_header) + 5] = 0xFF;
-	ptr[sizeof(struct ether_header) + 6] = 0xFF;
+	if (vlan) {
+		ptr[sizeof(struct ether_header) + 0] = (0xE << 4) | (id >> 8);
+		ptr[sizeof(struct ether_header) + 1] = id & 0xFF;
+		ptr[sizeof(struct ether_header) + 2] = htons(0x0AFF) & 0xFF;
+		ptr[sizeof(struct ether_header) + 3] = htons(0x0AFF) >> 8;
+	}
+	ptr[sizeof(struct ether_header) + offset] = 0xFF;
+	ptr[sizeof(struct ether_header) + 1 + offset] = 0xFF;
+	ptr[sizeof(struct ether_header) + 2 + offset] = 0xFF;
 	msgs[rows + 1].msg_hdr.msg_iov = &iovecs[1];
 	msgs[rows + 1].msg_hdr.msg_iovlen = 1;
 	
 	for (x = 0; x < rows; x++) {
-		ptr = (unsigned char *) malloc(sizeof(struct ether_header) + 11);
+		ptr = (unsigned char *) malloc(sizeof(struct ether_header) + 7 + offset);
 		iovecs[x * 2 + 2].iov_base = ptr;
-		iovecs[x * 2 + 2].iov_len = sizeof(struct ether_header) + 11;
-		memset(ptr, 0, sizeof(struct ether_header) + 11);
+		iovecs[x * 2 + 2].iov_len = sizeof(struct ether_header) + 7 + offset;
+		memset(ptr, 0, sizeof(struct ether_header) + 7 + offset);
 		header = (struct ether_header *) ptr;
-		header->ether_type = htons(0x8100);
+		if (!vlan)
+			header->ether_type = htons(0x5500);
+		else
+			header->ether_type = htons(0x8100);
 		set_address(header);
-		ptr[sizeof(struct ether_header) + 0] = (0xE << 4) | (id >> 8);
-		ptr[sizeof(struct ether_header) + 1] = id & 0xFF;
-		ptr[sizeof(struct ether_header) + 2] = htons(0x5500) & 0xFF;
-		ptr[sizeof(struct ether_header) + 3] = htons(0x5500) >> 8;
-		ptr[sizeof(struct ether_header) + 5] = x >> 8;
-		ptr[sizeof(struct ether_header) + 4] = x & 0xFF;
-		ptr[sizeof(struct ether_header) + 7] = cols >> 8;
-		ptr[sizeof(struct ether_header) + 8] = cols & 0xFF;
-		ptr[sizeof(struct ether_header) + 9] = 0x08;
-		ptr[sizeof(struct ether_header) + 10] = 0x88;
+		if (vlan) {
+			ptr[sizeof(struct ether_header) + 0] = (0xE << 4) | (id >> 8);
+			ptr[sizeof(struct ether_header) + 1] = id & 0xFF;
+			ptr[sizeof(struct ether_header) + 2] = htons(0x5500) & 0xFF;
+			ptr[sizeof(struct ether_header) + 3] = htons(0x5500) >> 8;
+		}
+		ptr[sizeof(struct ether_header) + 1 + offset] = x >> 8;
+		ptr[sizeof(struct ether_header) + offset] = x & 0xFF;
+		ptr[sizeof(struct ether_header) + 3 + offset] = cols >> 8;
+		ptr[sizeof(struct ether_header) + 4 + offset] = cols & 0xFF;
+		ptr[sizeof(struct ether_header) + 5 + offset] = 0x08;
+		ptr[sizeof(struct ether_header) + 9 + offset] = 0x88;
 		iovecs[x * 2 + 3].iov_base = (buffer + (x * cols));
 		iovecs[x * 2 + 3].iov_len = cols * sizeof(Matrix_RGB_t);
 		msgs[x].msg_hdr.msg_iov = &iovecs[x * 2 + 2];
