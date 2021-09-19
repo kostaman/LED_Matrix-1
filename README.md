@@ -25,6 +25,4 @@ The receiver card supports:
 
 Linux logic uses IO vectors in scatter gather configuration to support high performance, lower memory usage, and streamlined interface. Rough performance estimates show PC as very high performance. Pi has good performance but may struggle in certain applications. Pi 2 is about 2.75 times faster than Pi.
 
-Further areas of expansion include PoE and VLAN support. Creating C++ class may also be considered. This logic should be portable into many different languages, frameworks and APIs. However complete reimplementation is also possible and fairly straight forward. PoE and VLAN have priority.
-
-VLAN enables channels via PoE switch which would enable a number of different applications using COTS solutions. Receiver cards also support chaining as an option.
+VLAN enables channels via PoE switch which would enable a number of different applications using COTS solutions. Receiver cards also support chaining as an option. Physical LANs is also an alternative using multiple NICs.
