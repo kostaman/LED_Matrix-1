@@ -24,7 +24,6 @@ namespace LED_Matrix {
 	class Matrix {
 		public:
 			Matrix(const char *interface);
-			~Matrix();
 			
 			void send_frame();
 			void send_frame(uint16_t vlan_id);
