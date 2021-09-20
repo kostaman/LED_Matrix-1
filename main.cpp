@@ -16,11 +16,16 @@
 using std::cerr;
 using std::endl;
 
+#include <thread>
+using std::thread;
+
 #include "Matrix.h"
 using LED_Matrix::Matrix;
 using LED_Matrix::Matrix_RGB_t;
 
 const int FPS = 60;
+
+extern void network(Matrix *m, uint32_t rows, uint32_t cols);
 
 int main(int argc, char **argv) {
 	int f;
@@ -39,6 +44,8 @@ int main(int argc, char **argv) {
 	
 	if (daemon(0, 0) < 0)
 		throw errno;
+		
+	thread t(network, &m, rows, cols);
 	
 	if ((f = open("/tmp/LED_Matrix.mem", O_RDWR)) < 0)
 		throw errno;
