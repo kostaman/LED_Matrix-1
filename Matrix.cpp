@@ -193,7 +193,7 @@ void Matrix::send_frame(bool vlan, uint16_t id) {
 		ptr[sizeof(struct ether_header) + 3 + offset] = cols >> 8;
 		ptr[sizeof(struct ether_header) + 4 + offset] = cols & 0xFF;
 		ptr[sizeof(struct ether_header) + 5 + offset] = 0x08;
-		ptr[sizeof(struct ether_header) + 9 + offset] = 0x88;
+		ptr[sizeof(struct ether_header) + 6 + offset] = 0x88;
 		iovecs[x * 2 + 3].iov_base = (buffer + (x * cols));
 		iovecs[x * 2 + 3].iov_len = cols * sizeof(Matrix_RGB_t);
 		msgs[x].msg_hdr.msg_iov = &iovecs[x * 2 + 2];
