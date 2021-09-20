@@ -45,7 +45,7 @@ Daemon:
 ```bash
 g++ -O3 Matrix.cpp main.cpp -o Matrix
 ```
-Trigger:
+Trigger (C++):
 ```bash
 g++ -O3 trigger.cpp -o trigger
 ```
