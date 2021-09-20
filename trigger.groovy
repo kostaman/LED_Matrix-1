@@ -12,7 +12,11 @@ import java.nio.channels.FileChannel;
 def map = new RandomAccessFile("/tmp/LED_Matrix.mem", "rw").getChannel().map(FileChannel.MapMode.READ_WRITE, 0, new File("/tmp/LED_Matrix.mem").length())
 
 // Set pixel
-map.put((Byte) 4, (Byte) 255)
+map.put(4, (Byte) 255)
 
 // Trigger send_frame
-map.put((Byte) 0, (Byte) 1)
+map.put(0, (Byte) 1)
+
+// Trigger send_frame with VLAN 13
+map.put(2, (Byte) 13)
+map.put(0, (Byte) 2)
