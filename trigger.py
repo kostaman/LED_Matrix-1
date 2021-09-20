@@ -9,7 +9,6 @@
  ''' 
  
 import mmap
-import os
 
 f = open("/tmp/LED_Matrix.mem", "r+b")
 mm = mmap.mmap(f.fileno(), length=0, access=mmap.ACCESS_WRITE)
@@ -32,5 +31,4 @@ while True:
 mm.seek(2)
 mm.write_byte(13)
 mm.seek(0)
-mm.write_byte(2)
-	
+mm.write_byte(2)	
