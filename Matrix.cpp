@@ -13,6 +13,9 @@
 #include <netinet/ether.h>
 #include <sys/ioctl.h>
 #include <sys/socket.h>
+#include <sys/stat.h>
+#include <sys/mman.h>
+#include <fcntl.h>
 #include <errno.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -22,11 +25,26 @@ using LED_Matrix::Matrix;
 using LED_Matrix::Matrix_RGB_t;
 
 Matrix::Matrix(const char *iface) {
-	fd = -1;
-	buffer = new Matrix_RGB_t[rows * cols];
+	int f;
+	uint32_t *ptr;
 	struct ifreq if_idx;
 	struct sockaddr_ll sock_addr;
 	unsigned dhost[] = { 0x11, 0x22, 0x33, 0x44, 0x55, 0x66 };
+	
+	if ((f = open("/tmp/LED_Matrix.mem", O_CREAT | O_RDWR, 0666)) < 0)
+		throw errno;
+	
+	if (chmod("/tmp/LED_Matrix.mem", 0666) < 0)
+		throw errno;
+		
+	if (ftruncate(f, 4 + (cols * rows * sizeof(Matrix_RGB_t))) < 0)
+		throw errno;
+	
+	ptr = (uint32_t *) mmap(NULL, 4 + (cols * rows * sizeof(Matrix_RGB_t)), PROT_READ | PROT_WRITE, MAP_SHARED, f, 0);
+	if (ptr == MAP_FAILED)
+		throw errno;
+	
+	buffer = (Matrix_RGB_t *) (ptr + 1);
 	
 	if ((fd = socket(AF_PACKET, SOCK_RAW, IPPROTO_RAW)) == -1)
 		throw errno;
@@ -43,12 +61,6 @@ Matrix::Matrix(const char *iface) {
 
 	if (bind(fd, (struct sockaddr *) &sock_addr, sizeof(sock_addr)) == -1) 
 		throw errno;
-}
-
-Matrix::~Matrix() {
-	delete[] buffer;
-	if (fd >= 0)
-		close(fd);
 }
 
 inline void Matrix::map(uint32_t *x, uint32_t *y) {
