@@ -51,9 +51,9 @@ g++ -O3 trigger.cpp -o trigger
 ```
 
 ## Running
-Daemon:
+Daemon: (Assuming your ethernet interface is "ens33".)
 ```bash
-sudo ./Matrix
+sudo ./Matrix "ens33"
 ```
 Trigger (C++):
 ```bash
