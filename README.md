@@ -77,3 +77,7 @@ test.c is was the first pass at this. I decided to move to C++ for mapping which
 
 ## Mapping
 Multiplex mapping is handled by the receiver card, however pixel mapping is handled by application logic. Currently the trigger programs do not bother with this. A little piece exists in Matrix.h and Matrix.cpp for supporting this with the map virtual method. Note that is only used in set_pixel not in set_pixel_raw. (Raw is used by network.cpp)
+
+This is kind of important for CC based panels which need a lot of serial bandwdith for high quality and refresh. One simple way to get this is to use multiple IO connectors provided by the receiver card. This causes the panels to be mapped vertically inside of horizontally, which is easily correct with a couple lines of code.
+
+Other applications also likely exist which may want this. Nice thing here is you are free to use as much processing power as you want. You can run this on a computer if you need more. So you can be pretty lazy potentially. The receiver card will if nothing else continue to show the last frame it got without any issues.
