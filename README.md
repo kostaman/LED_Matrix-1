@@ -55,11 +55,11 @@ Daemon:
 ```bash
 sudo ./Matrix
 ```
-Trigger (C++): (Must start Daemon before, only need once)
+Trigger (C++):
 ```bash
 ./trigger
 ```
-Trigger (Groovy): (Must start Daemon before, only need once)
+Trigger (Groovy):
 ```bash
 groovy trigger.groovy
 ```
