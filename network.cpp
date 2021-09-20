@@ -26,19 +26,31 @@ struct packet {
 	uint8_t size;
 };
 
+int transfer(int client, bool out, void *ptr, uint32_t len) {
+	int result;
+	struct timeval tv;
+	tv.tv_sec = 10;
+	tv.tv_usec = 0;
+	result = setsockopt(client, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(tv));
+	if (result > 0) {
+		if (out)
+			result = send(client, ptr, len, 0);
+		else
+			result = recv(client, ptr, len, 0);
+		if (result == len)
+			return 0;
+	}
+	return result;
+}
+
 void func(Matrix *m, int client, uint32_t rows, uint32_t cols) {
 	packet p;
 	uint64_t val;
 	uint16_t id;
-	struct timeval tv;
-	
-	tv.tv_sec = 10;
-	tv.tv_usec = 0;
-	if (setsockopt(client, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(tv)) < 0)
-		goto exit;
+	Matrix_RGB_t pixel;
 	
 	while (1) {
-		if (recv(client, &p, sizeof(p), 0) != sizeof(p))
+		if (transfer(client, false, &p, sizeof(p)))
 			goto exit;
 		
 		if (p.marker != 0x09202021) 
@@ -47,7 +59,7 @@ void func(Matrix *m, int client, uint32_t rows, uint32_t cols) {
 		switch (p.command) {
 			case 0: // send_frame with VLAN
 				if (p.size == sizeof(id)) {
-					if (recv(client, &id, sizeof(id), 0) != sizeof(id)) 
+					if (transfer(client, false, &id, sizeof(id))) 
 						goto exit;
 					m->send_frame(id);
 				}
@@ -60,7 +72,7 @@ void func(Matrix *m, int client, uint32_t rows, uint32_t cols) {
 				break;
 			case 2: // get rows and cols
 				val = ((uint64_t) rows << 32) + cols;
-				if (send(client, &val, sizeof(val), 0) != sizeof(val))
+				if (transfer(client, true, &val, sizeof(val)))
 					goto exit;
 				break;
 			case 3: // set_pixel
@@ -74,7 +86,7 @@ void func(Matrix *m, int client, uint32_t rows, uint32_t cols) {
 					if (ptr == NULL)
 						goto exit;
 						
-					if (recv(client, ptr, p.size, 0) != p.size)
+					if (transfer(client, false, ptr, p.size))
 						goto exit;
 						
 					addr = (uint32_t *) ptr;
@@ -88,6 +100,15 @@ void func(Matrix *m, int client, uint32_t rows, uint32_t cols) {
 				break;
 			case 4: // clear
 				m->clear();
+				break;
+			case 5: // fill
+				if (p.size != sizeof(pixel))
+					goto exit;
+				else {
+					if (transfer(client, false, &pixel, p.size))
+						goto exit;
+					m->fill(pixel);
+				}
 				break;
 			default:
 				goto exit;
