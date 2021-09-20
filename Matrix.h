@@ -23,7 +23,7 @@ namespace LED_Matrix {
     
 	class Matrix {
 		public:
-			Matrix(const char *interface);
+			Matrix(const char *interface, uint32_t rows = 64, uint32_t cols = 32);
 			
 			void send_frame();
 			void send_frame(uint16_t vlan_id);
@@ -35,10 +35,9 @@ namespace LED_Matrix {
 		protected:
 			virtual void map(uint32_t *x, uint32_t *y);
 			
-			const uint32_t rows = 64;
-			const uint32_t cols = 32;
-		
 			int fd;
+			uint32_t rows;
+			uint32_t cols;
 			Matrix_RGB_t *buffer;
 
 		private:
