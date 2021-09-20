@@ -17,6 +17,10 @@ map.put(4, (Byte) 255)
 // Trigger send_frame
 map.put(0, (Byte) 1)
 
+// Wait for trigger to finish
+while (map.get(0))
+	println("Waiting")
+
 // Trigger send_frame with VLAN 13
 map.put(2, (Byte) 13)
 map.put(0, (Byte) 2)
