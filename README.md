@@ -51,9 +51,9 @@ g++ -O3 trigger.cpp -o trigger
 ```
 
 ## Running
-Daemon: (Assuming your ethernet interface is "ens33".)
+Daemon: (Assuming your ethernet interface is "ens33" and the receiver card is configured for 64x32.)
 ```bash
-sudo ./Matrix "ens33"
+sudo ./Matrix "ens33" 64 32
 ```
 Trigger (C++):
 ```bash
