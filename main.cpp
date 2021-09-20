@@ -11,6 +11,10 @@
 #include <fcntl.h>
 #include <errno.h>
 
+#include <iostream>
+using std::cerr;
+using std::endl;
+
 #include "Matrix.h"
 using LED_Matrix::Matrix;
 using LED_Matrix::Matrix_RGB_t;
@@ -21,7 +25,12 @@ int main(int argc, char **argv) {
 	int f;
 	volatile uint8_t *ptr;
 	
-	Matrix m("ens33");
+	if (argc != 2) {
+		cerr << "Usage: sudo ./Matrix \"interface\"" << endl;
+		return -1;
+	}
+	
+	Matrix m(argv[1]);
 	
 	if (daemon(0, 0) < 0)
 		throw errno;
