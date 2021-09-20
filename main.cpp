@@ -15,6 +15,8 @@
 using LED_Matrix::Matrix;
 using LED_Matrix::Matrix_RGB_t;
 
+const int FPS = 60;
+
 int main(int argc, char **argv) {
 	int f;
 	volatile uint8_t *ptr;
@@ -33,6 +35,9 @@ int main(int argc, char **argv) {
 		
 	while (1) {
 		switch (*ptr) {
+			case 0:
+				usleep(1000000 / FPS);
+				break;
 			case 1:
 				m.send_frame();
 				*ptr = 0;
@@ -42,7 +47,8 @@ int main(int argc, char **argv) {
 				*ptr = 0;
 				break;
 			default:
-				usleep(1000000 / 60);
+				*ptr = 0;
+				break;
 		}
 	}
 	
