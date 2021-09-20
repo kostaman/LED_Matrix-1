@@ -22,8 +22,13 @@ int main(int argc, char **argv) {
 	ptr = (volatile uint8_t *) mmap(NULL, 4, PROT_READ | PROT_WRITE, MAP_SHARED, f, 0);
 	if (ptr == MAP_FAILED)
 		throw errno;
-		
+	
+	// Trigger send_frame
 	*ptr = 1;
+	
+	// Trigger send_frame with VLAN 13
+	*(ptr + 2) = 13;
+	*ptr = 2;
 	
 	return 0;
 }
