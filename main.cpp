@@ -5,20 +5,39 @@
  *
  * Created on September 18, 2021
  */
- 
+
+#include <sys/mman.h>
+#include <unistd.h>
+#include <fcntl.h>
+#include <errno.h>
+
 #include "Matrix.h"
 using LED_Matrix::Matrix;
 using LED_Matrix::Matrix_RGB_t;
 
 int main(int argc, char **argv) {
-	uint8_t x = 0;
+	int f;
+	volatile uint8_t *ptr;
 	
 	Matrix m("ens33");
 	
-	while(1) {
-		m.fill(Matrix_RGB_t(x, x, x));
-		m.send_frame((uint16_t) 0x12);
-		x++;
+	if (daemon(0, 0) < 0)
+		throw errno;
+	
+	if ((f = open("/tmp/LED_Matrix.mem", O_RDWR)) < 0)
+		throw errno;
+		
+	ptr = (volatile uint8_t *) mmap(NULL, 4, PROT_READ | PROT_WRITE, MAP_SHARED, f, 0);
+	if (ptr == MAP_FAILED)
+		throw errno;
+		
+	while (1) {
+		if (*ptr) {
+			m.send_frame();
+			*ptr = 0;
+		}
+		else
+			usleep(1000000 / 60);
 	}
 	
 	return 0;
