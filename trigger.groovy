@@ -1,3 +1,5 @@
+#!/usr/bin/env groovy
+
 /* 
  * File:   trigger.groovy
  * Author: David Thacher
