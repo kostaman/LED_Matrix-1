@@ -39,3 +39,27 @@ Example of language portability is shown with trigger programs. One for C/C++ an
 This code base is very straight forward, and this logic is fairly light weight. This is due to the significant amount of offloading provided by the ColorLight 5A-75B. Note configuration complexity is also passed off to application logic and ColorLight configuration software. This simplifies the code down to basically a wrapper/interface logic for higher level logic.
 
 Therefore converting this to something not based in Linux would be straightforward, given it can generate L2 packets.
+
+## Building
+Daemon:
+```bash
+g++ -O3 Matrix.cpp main.cpp -o Matrix
+```
+Trigger:
+```bash
+g++ -O3 trigger.cpp -o trigger
+```
+
+## Running
+Daemon:
+```bash
+sudo ./Matrix
+```
+Trigger (C++): (Must start Daemon before, only need once)
+```bash
+./trigger
+```
+Trigger (Groovy): (Must start Daemon before, only need once)
+```bash
+groovy trigger.groovy
+```
