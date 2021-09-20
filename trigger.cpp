@@ -26,6 +26,9 @@ int main(int argc, char **argv) {
 	// Trigger send_frame
 	*ptr = 1;
 	
+	// Wait for trigger to finish
+	while(*ptr);
+	
 	// Trigger send_frame with VLAN 13
 	*(ptr + 2) = 13;
 	*ptr = 2;
