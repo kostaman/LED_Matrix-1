@@ -32,12 +32,18 @@ int main(int argc, char **argv) {
 		throw errno;
 		
 	while (1) {
-		if (*ptr) {
-			m.send_frame();
-			*ptr = 0;
+		switch (*ptr) {
+			case 1:
+				m.send_frame();
+				*ptr = 0;
+				break;
+			case 2:
+				m.send_frame((uint16_t) (*(ptr + 1) << 8 | *(ptr + 2)));
+				*ptr = 0;
+				break;
+			default:
+				usleep(1000000 / 60);
 		}
-		else
-			usleep(1000000 / 60);
 	}
 	
 	return 0;
