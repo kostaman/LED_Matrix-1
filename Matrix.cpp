@@ -24,7 +24,7 @@
 using LED_Matrix::Matrix;
 using LED_Matrix::Matrix_RGB_t;
 
-Matrix::Matrix(const char *iface) {
+Matrix::Matrix(const char *iface, uint32_t r, uint32_t c) : rows(r), cols(c) {
 	int f;
 	uint32_t *ptr;
 	struct ifreq if_idx;
