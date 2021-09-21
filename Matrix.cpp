@@ -32,7 +32,8 @@ Matrix::Matrix(const char *iface, uint32_t r, uint32_t c) : rows(r), cols(c) {
 	unsigned dhost[] = { 0x11, 0x22, 0x33, 0x44, 0x55, 0x66 };
 	
 	if ((f = open("/tmp/LED_Matrix.mem", O_CREAT | O_RDWR, 0666)) < 0)
-		throw errno;
+		if ((f = open("/tmp/LED_Matrix.mem", O_RDWR, 0666)) < 0)
+			throw errno;
 	
 	if (chmod("/tmp/LED_Matrix.mem", 0666) < 0)
 		throw errno;
