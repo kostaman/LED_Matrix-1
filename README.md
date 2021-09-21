@@ -93,7 +93,7 @@ For the daemon look at main.cpp (trigger protocol) and network.cpp (TCP protocol
 
 For the demo look at demo.cpp. This logic uses Matrix.h and Matrix.cpp, which requires super user priviledge. Note it is recommended to generate logic against daemon where possible.
 
-For the trigger programs look at the respective implementation. Note these only work with daemon. These could be rewritten to support define a complete class which scretely ties into daemon locally or remotely. N0te the performance impact of this is unknown.
+For the trigger programs look at the respective implementation. Note these only work with daemon. These could be rewritten to support define a complete class which scretely ties into daemon locally or remotely. Note the performance impact of this is unknown.
 
 ## Mapping
 Multiplex mapping is handled by the receiver card, however pixel mapping is handled by application logic. Currently the trigger programs do not bother with this. A little piece exists in Matrix.h and Matrix.cpp for supporting this with the map virtual method. Note that is only used in set_pixel not in set_pixel_raw. (Raw is used by network.cpp)
