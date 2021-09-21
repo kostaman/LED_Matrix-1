@@ -51,6 +51,10 @@ Trigger (C++):
 ```bash
 g++ -O3 trigger.cpp -o trigger
 ```
+Trigger Remote (C):
+```bash
+gcc -O3 trigger_remote.c -o trigger_remote
+```
 
 ## Running
 Daemon: (Assuming your ethernet interface is "ens33" and the receiver card is configured for 64x32.)
@@ -64,6 +68,14 @@ Trigger (C++):
 Trigger (Groovy):
 ```bash
 groovy trigger.groovy
+```
+Trigger (Python):
+```bash
+python3 trigger.py
+```
+Trigger Remote (C):
+```bash
+./trigger_remote 127.0.0.1
 ```
 
 ## Files
