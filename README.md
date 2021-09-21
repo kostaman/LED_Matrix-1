@@ -89,9 +89,9 @@ Trigger Remote (C):
 ## Files
 The base of this repo is in Matrix.h and Matrix.cpp. If looking to see how it works or port this to another implementation/platform look there.
 
-For the daemon look at main.cpp (trigger protocol) and network.cpp (TCP protocol). This logic uses Matrix.h and Matrix.cpp, which requires super user privilege.
+For the daemon look at main.cpp (trigger protocol) and network.cpp (TCP protocol). This logic uses Matrix.h and Matrix.cpp, which requires super user priviledge.
 
-For the demo look at demo.cpp. This logic uses Matrix.h and Matrix.cpp, which requires super user privilege. Note it is recommended to generate logic against daemon where possible.
+For the demo look at demo.cpp. This logic uses Matrix.h and Matrix.cpp, which requires super user priviledge. Note it is recommended to generate logic against daemon where possible.
 
 For the trigger programs look at the respective implementation. Note these only work with daemon. These could be rewritten to support define a complete class which scretely ties into daemon locally or remotely. NOte the performance impact of this is unknown.
 
