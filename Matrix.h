@@ -25,6 +25,9 @@ namespace LED_Matrix {
 		public:
 			Matrix(const char *interface, uint32_t rows = 64, uint32_t cols = 32);
 			
+			virtual uint32_t get_rows() { return 16; }
+			virtual uint32_t get_columns() { return 128; }
+			
 			void send_frame();
 			void send_frame(uint16_t vlan_id);
 			
