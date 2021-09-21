@@ -77,6 +77,12 @@ void Matrix::set_pixel(uint32_t x, uint32_t y, Matrix_RGB_t pixel) {
     	*(buffer + (y * cols) + x) = pixel;
 }
 
+void Matrix::set_pixel_raw(uint32_t x, uint32_t y, Matrix_RGB_t pixel) {
+	y %= rows;
+	x %= cols;
+    	*(buffer + (y * cols) + x) = pixel;
+}
+
 void Matrix::fill(Matrix_RGB_t pixel) {
     	for (uint32_t x = 0; x < cols; x++)
     		for (uint32_t y = 0; y < rows; y++)

@@ -32,9 +32,11 @@ Note this will work with PWM/MM panels. You need to check the receiver card supp
 ## About
 This logic works off shared memory map created by daemon. This enables other languages on the system to use the logic without inheriting/requiring super user. Shared memory map is creating in /tmp and is assumed to be a RAM disk or something like it. (This may not be desirable for every use case.)
 
-Shared memory was choosen to avoid overhead of other methods. TCP was considered and may be added into daemon later on, which should be fairly straightforward. There is a command interface built into the first four bytes of memory. The daemon will poll this periodically to activate Matrix functions. Double buffering may come later however currently logic should wait for the command to be reset back to zero before proceeding. Current implementation is blocking to prevent writing while updating issues. (Also due to laziness.)
+Shared memory was choosen to avoid overhead of other methods. There is a command interface built into the first four bytes of memory. The daemon will poll this periodically to activate Matrix functions. Double buffering may come later however currently logic should wait for the command to be reset back to zero before proceeding. Current implementation is blocking to prevent writing while updating issues. (Also due to laziness.)
 
-Example of language portability is shown with trigger programs. One for C/C++ and one for Java/Groovy. Currently Matrix class is only implemented on Linux, inorder to use on other systems this would need to be reimplemented or use network daemon running on Linux server. Note other languages could wrap up command interface into its own class wrapper.
+Note there is no protection against race conditions and hazards on shared memory. If multiple processors grab there could be problems, however this is not expected to be very common. TCP logic currently processes connections serially one at a time to prevent this issue and possible resource usage issues. Note this is still a work in progress and very lazy.
+
+Examples of language portability is shown with trigger programs. One for C/C++ and one for Java/Groovy. Currently Matrix class is only implemented on Linux, inorder to use on other systems this would need to be reimplemented or use network daemon running on Linux server. Note other languages could wrap up command interface into its own class wrapper.
 
 This code base is very straight forward, and this logic is fairly light weight. This is due to the significant amount of offloading provided by the ColorLight 5A-75B. Note configuration complexity is also passed off to application logic and ColorLight configuration software. This simplifies the code down to basically a wrapper/interface logic for higher level logic.
 
@@ -43,7 +45,7 @@ Therefore converting this to something not based in Linux would be straightforwa
 ## Building
 Daemon:
 ```bash
-g++ -O3 Matrix.cpp main.cpp -o Matrix
+g++ -O3 Matrix.cpp network.cpp main.cpp -o Matrix -lpthread
 ```
 Trigger (C++):
 ```bash
@@ -75,3 +77,19 @@ Trigger Remote (C):
 ```bash
 ./trigger_remote 127.0.0.1
 ```
+
+## Files
+The base of this repo is in Matrix.h and Matrix.cpp. If looking to see how it works or port this to another implementation/platform look there.
+
+For the daemon look at main.cpp (trigger protocol) and network.cpp (TCP protocol). This logic uses Matrix.h and Matrix.cpp.
+
+For the trigger programs look at the respective implementation. Note these only work with daemon. These could be rewritten to support define a complete class which scretely ties into daemon locally or remotely. NOte the performance impact of this is unknown.
+
+test.c is was the first pass at this. I decided to move to C++ for mapping which I later mostly abandoned for trigger/TCP protocol. Daemon does use C++ thread, although this would have been easy in pthreads.
+
+## Mapping
+Multiplex mapping is handled by the receiver card, however pixel mapping is handled by application logic. Currently the trigger programs do not bother with this. A little piece exists in Matrix.h and Matrix.cpp for supporting this with the map virtual method. Note that is only used in set_pixel not in set_pixel_raw. (Raw is used by network.cpp)
+
+This is kind of important for CC based panels which need a lot of serial bandwdith for high quality and refresh. One simple way to get this is to use multiple IO connectors provided by the receiver card. This causes the panels to be mapped vertically inside of horizontally, which is easily correct with a couple lines of code.
+
+Other applications also likely exist which may want this. Nice thing here is you are free to use as much processing power as you want. You can run this on a computer if you need more. So you can be pretty lazy potentially. The receiver card will if nothing else continue to show the last frame it got without any issues.
