@@ -32,13 +32,15 @@ int transfer(int client, bool out, void *ptr, uint32_t len) {
 	tv.tv_sec = 10;
 	tv.tv_usec = 0;
 	result = setsockopt(client, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(tv));
-	if (result > 0) {
+	if (result == 0) {
 		if (out)
 			result = send(client, ptr, len, 0);
 		else
 			result = recv(client, ptr, len, 0);
 		if (result == len)
 			return 0;
+		else
+			return -1;
 	}
 	return result;
 }
