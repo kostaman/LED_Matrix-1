@@ -47,6 +47,10 @@ Daemon:
 ```bash
 g++ -O3 Matrix.cpp network.cpp main.cpp -o Matrix -lpthread
 ```
+Demo:
+```bash
+g++ -O3 Matrix.cpp demo.cpp -o demo
+```
 Trigger (C++):
 ```bash
 g++ -O3 trigger.cpp -o trigger
@@ -60,6 +64,10 @@ gcc -O3 trigger_remote.c -o trigger_remote
 Daemon: (Assuming your ethernet interface is "ens33" and the receiver card is configured for 64x32.)
 ```bash
 sudo ./Matrix "ens33" 64 32
+```
+Demo:
+```bash
+sudo ./demo -D 0
 ```
 Trigger (C++):
 ```bash
@@ -81,7 +89,9 @@ Trigger Remote (C):
 ## Files
 The base of this repo is in Matrix.h and Matrix.cpp. If looking to see how it works or port this to another implementation/platform look there.
 
-For the daemon look at main.cpp (trigger protocol) and network.cpp (TCP protocol). This logic uses Matrix.h and Matrix.cpp.
+For the daemon look at main.cpp (trigger protocol) and network.cpp (TCP protocol). This logic uses Matrix.h and Matrix.cpp, which requires super user privilege.
+
+For the demo look at demo.cpp. This logic uses Matrix.h and Matrix.cpp, which requires super user privilege. Note it is recommended to generate logic against daemon where possible.
 
 For the trigger programs look at the respective implementation. Note these only work with daemon. These could be rewritten to support define a complete class which scretely ties into daemon locally or remotely. NOte the performance impact of this is unknown.
 
