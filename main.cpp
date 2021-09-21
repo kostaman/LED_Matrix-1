@@ -27,25 +27,36 @@ const int FPS = 60;
 
 extern void network(Matrix *m, uint32_t rows, uint32_t cols);
 
+void usage(int e, char **argv) {
+	if (e != 0)
+		cerr << "Error: " << strerror(e) << endl << endl;
+	cerr << "Usage: sudo " << argv[0] << " \"interface\" <rows> <cols>" << endl;
+	exit(-1);
+}
+
 int main(int argc, char **argv) {
 	int f;
 	uint16_t rows, cols;
 	volatile uint8_t *ptr;
+	Matrix *m;
 	
-	if (argc != 4) {
-		cerr << "Usage: sudo ./Matrix \"interface\" <rows> <cols>" << endl;
-		return -1;
-	}
+	if (argc != 4)
+		usage(0, argv);
 	
 	rows = atoi(argv[2]);
 	cols = atoi(argv[3]);
 	
-	Matrix m(argv[1], rows, cols);
+	try {
+		m = new Matrix(argv[1], rows, cols);
+	} 
+	catch (int e) {
+		usage(e, argv);
+	}
 	
 	if (daemon(0, 0) < 0)
 		throw errno;
 		
-	thread t(network, &m, rows, cols);
+	thread t(network, m, rows, cols);
 	
 	if ((f = open("/tmp/LED_Matrix.mem", O_RDWR)) < 0)
 		throw errno;
@@ -60,11 +71,11 @@ int main(int argc, char **argv) {
 				usleep(1000000 / FPS);
 				break;
 			case 1:
-				m.send_frame();
+				m->send_frame();
 				*ptr = 0;
 				break;
 			case 2:
-				m.send_frame((uint16_t) (*(ptr + 1) << 8 | *(ptr + 2)));
+				m->send_frame((uint16_t) (*(ptr + 1) << 8 | *(ptr + 2)));
 				*ptr = 0;
 				break;
 			case 3:
