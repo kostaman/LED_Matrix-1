@@ -6,7 +6,7 @@
  * Original version: https://github.com/hzeller/rpi-rgb-led-matrix/blob/1362da5a2991a53f567c68c17f161731a66cdf8e/examples-api-use/demo-main.cc
  * Original License: public domain
  * 
- * Current License: GPL 3 when used with https://github.com/daveythacher/LED_Matrix, otherwise orignal license applies
+ * Current License: GPL 3 when used with https://github.com/daveythacher/LED_Matrix, otherwise orignal license applies to this file
  *
  * Warning: This still need a lot of work.
  *
