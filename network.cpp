@@ -69,7 +69,7 @@ void func(Matrix *m, int client, uint32_t rows, uint32_t cols) {
 				break;
 			case 1: // send_frame
 				if (!p.size) 
-					m->send_frame(id);
+					m->send_frame();
 				else goto exit;
 				break;
 			case 2: // get rows and cols
