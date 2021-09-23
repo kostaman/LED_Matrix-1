@@ -33,6 +33,7 @@ Matrix::Matrix(const char *iface, uint32_t r, uint32_t c) : rows(r), cols(c) {
 	unsigned dhost[] = { 0x11, 0x22, 0x33, 0x44, 0x55, 0x66 };
 	
 	brightness = 0xFF;
+	b_raw = 0xFF;
 	
 	if ((f = open("/tmp/LED_Matrix.mem", O_CREAT | O_RDWR, 0666)) < 0)
 		if ((f = open("/tmp/LED_Matrix.mem", O_RDWR, 0666)) < 0)
@@ -98,7 +99,8 @@ void Matrix::clear() {
 }
 
 void Matrix::set_brightness(uint8_t b) {
-	b %= 100;
+	b %= 101;
+	b_raw = round(b / 100.0 * 255.0);
 	brightness = round(pow(b / 100.0, 0.405) * 255.0);
 }
 
@@ -156,11 +158,11 @@ void Matrix::send_frame(bool vlan, uint16_t id) {
 		ptr[sizeof(struct ether_header) + 2] = htons(0x0107) & 0xFF;
 		ptr[sizeof(struct ether_header) + 3] = htons(0x0107) >> 8;
 	}
-	ptr[sizeof(struct ether_header) + 21 + offset] = 0xFF;
+	ptr[sizeof(struct ether_header) + 21 + offset] = b_raw;
 	ptr[sizeof(struct ether_header) + 22 + offset] = 0x05;
-	ptr[sizeof(struct ether_header) + 24 + offset] = 0xFF;
-	ptr[sizeof(struct ether_header) + 25 + offset] = 0xFF;
-	ptr[sizeof(struct ether_header) + 26 + offset] = 0xFF;
+	ptr[sizeof(struct ether_header) + 24 + offset] = b_raw;
+	ptr[sizeof(struct ether_header) + 25 + offset] = b_raw;
+	ptr[sizeof(struct ether_header) + 26 + offset] = b_raw;
 	msgs[rows].msg_hdr.msg_iov = &iovecs[0];
 	msgs[rows].msg_hdr.msg_iovlen = 1;
 	
