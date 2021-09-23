@@ -41,7 +41,7 @@ namespace LED_Matrix {
 			virtual void map(uint32_t *x, uint32_t *y);
 			
 			int fd;
-			uint8_t brightness;
+			uint8_t b_raw, brightness;
 			uint32_t rows;
 			uint32_t cols;
 			Matrix_RGB_t *buffer;
