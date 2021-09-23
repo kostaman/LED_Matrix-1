@@ -170,7 +170,7 @@ void Matrix::send_frame(bool vlan, uint16_t id) {
 	memset(ptr, 0, 77 + offset);
 	header = (struct ether_header *) ptr;
 	if (!vlan)
-		header->ether_type = htons(0x0AFF);
+		header->ether_type = htons(0x0A00 + brightness);
 	else
 		header->ether_type = htons(0x8100);
 	set_address(header);
