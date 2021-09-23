@@ -49,6 +49,7 @@ void func(Matrix *m, int client, uint32_t rows, uint32_t cols) {
 	packet p;
 	uint64_t val;
 	uint16_t id;
+	uint8_t b;
 	Matrix_RGB_t pixel;
 	
 	while (1) {
@@ -110,6 +111,15 @@ void func(Matrix *m, int client, uint32_t rows, uint32_t cols) {
 					if (transfer(client, false, &pixel, p.size))
 						goto exit;
 					m->fill(pixel);
+				}
+				break;
+			case 6: // set_brightness
+				if (p.size != sizeof(b))
+					goto exit;
+				else {
+					if (transfer(client, false, &b, p.size))
+						goto exit;
+					m->set_brightness(b);
 				}
 				break;
 			default:
