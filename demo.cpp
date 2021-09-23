@@ -20,6 +20,7 @@
  * Modifications:
  *	9/21/21 - David Thacher: Ported to work with https://github.com/daveythacher/LED_Matrix
 					Removed classes BrightnessPulseGenerator, GeneticColors, SimpleSquare, VolumeBars, ImageScroller
+ *	9/22/21 - David Thacher: Ported BrightnessPulseGenerator
  */
 
 #include <assert.h>
@@ -90,6 +91,36 @@ public:
   }
 
 private:
+};
+
+// Simple generator that pulses through brightness on red, green, blue and white
+class BrightnessPulseGenerator : public DemoRunner {
+public:
+  BrightnessPulseGenerator(Matrix *m) : DemoRunner(m) {}
+  void Run() override {
+    const uint8_t max_brightness = 100;
+    const uint8_t c = 255;
+    uint8_t count = 0;
+    uint8_t x = max_brightness;
+
+    while (1) {
+      if (++x > max_brightness) {
+      	 x = 0;
+        count++;
+      }
+      m->set_brightness(x);
+
+      switch (count % 4) {
+      case 0: m->fill(Matrix_RGB_t(c, 0, 0)); break;
+      case 1: m->fill(Matrix_RGB_t(0, c, 0)); break;
+      case 2: m->fill(Matrix_RGB_t(0, 0, c)); break;
+      case 3: m->fill(Matrix_RGB_t(c, c, c)); break;
+      }
+      
+      m->send_frame();
+      usleep(20 * 1000);
+    }
+  }
 };
 
 class GrayScaleBlock : public DemoRunner {
@@ -560,7 +591,8 @@ static int usage(const char *progname) {
           "\t5  - Grayscale Block\n"
           "\t6  - Abelian sandpile model (-m <time-step-ms>)\n"
           "\t7  - Conway's game of life (-m <time-step-ms>)\n"
-          "\t8  - Langton's ant (-m <time-step-ms>)\n");
+          "\t8  - Langton's ant (-m <time-step-ms>)\n"
+          "\t11 - Brightness pulse generator\n");
   fprintf(stderr, "Example:\n\tsudo %s -D 0\n", progname);
   return 1;
 }
@@ -613,6 +645,9 @@ int main(int argc, char *argv[]) {
   case 8:
     demo_runner = new Ant(m, scroll_ms);
     break;  
+  case 11:
+    demo_runner = new BrightnessPulseGenerator(m);
+    break;
   default:
     return usage(argv[0]);
   }
