@@ -158,11 +158,12 @@ void Matrix::send_frame(bool vlan, uint16_t id) {
 		ptr[sizeof(struct ether_header) + 2] = htons(0x0107) & 0xFF;
 		ptr[sizeof(struct ether_header) + 3] = htons(0x0107) >> 8;
 	}
-	ptr[sizeof(struct ether_header) + 21 + offset] = b_raw;
-	ptr[sizeof(struct ether_header) + 22 + offset] = 0x05;
-	ptr[sizeof(struct ether_header) + 24 + offset] = b_raw;
-	ptr[sizeof(struct ether_header) + 25 + offset] = b_raw;
-	ptr[sizeof(struct ether_header) + 26 + offset] = b_raw;
+	ptr[sizeof(struct ether_header) + 21 + offset] = b_raw;		// Global brightness? (Not used)
+	ptr[sizeof(struct ether_header) + 22 + offset] = 0x05;		// Enables brightness settings? (Unstable if not set)
+	// Changes with Color Temperature setting (Not used), bell curve shift of R and/or B centered at 6500 (default)
+	ptr[sizeof(struct ether_header) + 24 + offset] = b_raw;		// R, B or G brightness ? (Not used)
+	ptr[sizeof(struct ether_header) + 25 + offset] = b_raw;		// R, B or G brightness ? (Not used)
+	ptr[sizeof(struct ether_header) + 26 + offset] = b_raw;		// R, B or G brightness ? (Not used)
 	msgs[rows].msg_hdr.msg_iov = &iovecs[0];
 	msgs[rows].msg_hdr.msg_iovlen = 1;
 	
@@ -172,6 +173,7 @@ void Matrix::send_frame(bool vlan, uint16_t id) {
 	memset(ptr, 0, 77 + offset);
 	header = (struct ether_header *) ptr;
 	if (!vlan)
+		// Changes with Color Temperature setting (Not used), bell curve shift of R and/or B centered at 6500 (default)
 		header->ether_type = htons(0x0A00 + brightness);
 	else
 		header->ether_type = htons(0x8100);
@@ -179,12 +181,14 @@ void Matrix::send_frame(bool vlan, uint16_t id) {
 	if (vlan) {
 		ptr[sizeof(struct ether_header) + 0] = (0xE << 4) | (id >> 8);
 		ptr[sizeof(struct ether_header) + 1] = id & 0xFF;
+		// Changes with Color Temperature setting (Not used), bell curve shift of R and/or B centered at 6500 (default)
 		ptr[sizeof(struct ether_header) + 2] = htons(0x0A00 + brightness) & 0xFF;
 		ptr[sizeof(struct ether_header) + 3] = htons(0x0A00 + brightness) >> 8;
 	}
-	ptr[sizeof(struct ether_header) + offset] = brightness;
+	// Changes with Color Temperature setting (Not used), bell curve shift of R and/or B centered at 6500 (default)
+	ptr[sizeof(struct ether_header) + offset] = brightness;	
 	ptr[sizeof(struct ether_header) + 1 + offset] = brightness;
-	ptr[sizeof(struct ether_header) + 2 + offset] = 0xFF;
+	ptr[sizeof(struct ether_header) + 2 + offset] = 0xFF;		// Function unknown
 	msgs[rows + 1].msg_hdr.msg_iov = &iovecs[1];
 	msgs[rows + 1].msg_hdr.msg_iovlen = 1;
 	
@@ -209,8 +213,8 @@ void Matrix::send_frame(bool vlan, uint16_t id) {
 		ptr[sizeof(struct ether_header) + offset] = x & 0xFF;
 		ptr[sizeof(struct ether_header) + 3 + offset] = cols >> 8;
 		ptr[sizeof(struct ether_header) + 4 + offset] = cols & 0xFF;
-		ptr[sizeof(struct ether_header) + 5 + offset] = 0x08;
-		ptr[sizeof(struct ether_header) + 6 + offset] = 0x88;
+		ptr[sizeof(struct ether_header) + 5 + offset] = 0x08;	// Function unknown
+		ptr[sizeof(struct ether_header) + 6 + offset] = 0x88;	// Function unknown
 		iovecs[x * 2 + 3].iov_base = (buffer + (x * cols));
 		iovecs[x * 2 + 3].iov_len = cols * sizeof(Matrix_RGB_t);
 		msgs[x].msg_hdr.msg_iov = &iovecs[x * 2 + 2];
