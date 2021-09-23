@@ -35,11 +35,13 @@ namespace LED_Matrix {
 			void set_pixel_raw(uint32_t x, uint32_t y, Matrix_RGB_t pixel);
 			void fill(Matrix_RGB_t pixel);
 			void clear();
+			void set_brightness(uint8_t brightness);
 
 		protected:
 			virtual void map(uint32_t *x, uint32_t *y);
 			
 			int fd;
+			uint8_t brightness;
 			uint32_t rows;
 			uint32_t cols;
 			Matrix_RGB_t *buffer;
