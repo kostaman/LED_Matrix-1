@@ -88,6 +88,10 @@ int main(int argc, char **argv) {
 				*(ptr + 3) = cols & 0xFF;
 				*ptr = 0;
 				break;
+			case 5:
+				m->set_brightness(*(ptr + 1));
+				*ptr = 0;
+				break;
 			default:
 				*ptr = 0;
 				break;
