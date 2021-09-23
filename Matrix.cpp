@@ -20,6 +20,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 
+#include <cmath>
 #include "Matrix.h"
 using LED_Matrix::Matrix;
 using LED_Matrix::Matrix_RGB_t;
@@ -30,6 +31,8 @@ Matrix::Matrix(const char *iface, uint32_t r, uint32_t c) : rows(r), cols(c) {
 	struct ifreq if_idx;
 	struct sockaddr_ll sock_addr;
 	unsigned dhost[] = { 0x11, 0x22, 0x33, 0x44, 0x55, 0x66 };
+	
+	brightness = 0xFF;
 	
 	if ((f = open("/tmp/LED_Matrix.mem", O_CREAT | O_RDWR, 0666)) < 0)
 		if ((f = open("/tmp/LED_Matrix.mem", O_RDWR, 0666)) < 0)
@@ -92,6 +95,11 @@ void Matrix::fill(Matrix_RGB_t pixel) {
 
 void Matrix::clear() {
 	fill(Matrix_RGB_t(0, 0, 0));	
+}
+
+void Matrix::set_brightness(uint8_t b) {
+	b %= 100;
+	brightness = round(pow(b / 100.0, 0.405) * 255.0);
 }
 
 static void set_address(struct ether_header *header) {
@@ -169,11 +177,11 @@ void Matrix::send_frame(bool vlan, uint16_t id) {
 	if (vlan) {
 		ptr[sizeof(struct ether_header) + 0] = (0xE << 4) | (id >> 8);
 		ptr[sizeof(struct ether_header) + 1] = id & 0xFF;
-		ptr[sizeof(struct ether_header) + 2] = htons(0x0AFF) & 0xFF;
-		ptr[sizeof(struct ether_header) + 3] = htons(0x0AFF) >> 8;
+		ptr[sizeof(struct ether_header) + 2] = htons(0x0A00 + brightness) & 0xFF;
+		ptr[sizeof(struct ether_header) + 3] = htons(0x0A00 + brightness) >> 8;
 	}
-	ptr[sizeof(struct ether_header) + offset] = 0xFF;
-	ptr[sizeof(struct ether_header) + 1 + offset] = 0xFF;
+	ptr[sizeof(struct ether_header) + offset] = brightness;
+	ptr[sizeof(struct ether_header) + 1 + offset] = brightness;
 	ptr[sizeof(struct ether_header) + 2 + offset] = 0xFF;
 	msgs[rows + 1].msg_hdr.msg_iov = &iovecs[1];
 	msgs[rows + 1].msg_hdr.msg_iovlen = 1;
