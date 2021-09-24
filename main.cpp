@@ -92,6 +92,10 @@ int main(int argc, char **argv) {
 				m->set_brightness(*(ptr + 1));
 				*ptr = 0;
 				break;
+			case 6:
+				m->fill(Matrix_RGB_t(*(ptr + 1), *(ptr + 2), *(ptr + 3)));
+				*ptr = 0;
+				break;
 			default:
 				*ptr = 0;
 				break;
