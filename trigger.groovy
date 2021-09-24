@@ -20,12 +20,12 @@ map.put(4, (Byte) 255)
 map.put(0, (Byte) 1)
 
 // Wait for trigger to finish
-while (map.get(0))
-	println("Waiting")
+while (map.get(0));
 
 // Trigger send_frame with VLAN 13
 map.put(2, (Byte) 13)
 map.put(0, (Byte) 2)
+while (map.get(0));
 
 // Get the number of Columns
 map.put(0, (Byte) 3)
@@ -37,8 +37,13 @@ map.put(0, (Byte) 4)
 while (map.get(0));
 def cols = (map.get(2) << 8) + map.get(3)
 
-// Fill display all white
+// Fill buffer all white
 map.put(1, (Byte) 255);
 map.put(2, (Byte) 255);
 map.put(3, (Byte) 255);
 map.put(0, (Byte) 6);
+while (map.get(0));
+
+// Trigger send_frame
+map.put(0, (Byte) 1)
+while (map.get(0));
