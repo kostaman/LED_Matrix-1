@@ -36,3 +36,9 @@ def rows = (map.get(2) << 8) + map.get(3)
 map.put(0, (Byte) 4)
 while (map.get(0));
 def cols = (map.get(2) << 8) + map.get(3)
+
+// Fill display all white
+map.put(1, (Byte) 255);
+map.put(2, (Byte) 255);
+map.put(3, (Byte) 255);
+map.put(0, (Byte) 6);
