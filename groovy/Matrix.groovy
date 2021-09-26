@@ -1,21 +1,18 @@
+/* 
+ * File:  Matrix.groovy
+ * Author: David Thacher
+ * License: GPL 3.0
+ *
+ * Created on September 25, 2021
+ */
+ 
 package groovy
+import groovy.Matrix_RGB_t;
 import java.nio.*;
 import java.nio.channels.FileChannel;
 
-class Matrix_RGB_t {
-	Matrix_RGB_t(byte r, byte g, byte b) {
-		red = r
-		green = g
-		blue = b
-	}
-
-	byte red
-	byte green
-	byte blue
-}
-
-class Matrix_mmem {
-	Matrix_mmem() {
+class Matrix {
+	Matrix() {
 		map = new RandomAccessFile("/tmp/LED_Matrix.mem", "rw").getChannel().map(FileChannel.MapMode.READ_WRITE, 0, new File("/tmp/LED_Matrix.mem").length())
 		map.put(0, (Byte) 3)
 		while (map.get(0));
@@ -43,8 +40,8 @@ class Matrix_mmem {
 	}
 		
 	def send_frame(int vlan_id) {
-		map.put(2, (byte) id & 0xFF)
-		map.put(1, (byte) id >> 8 & 0xFF)
+		map.put(2, (byte) (vlan_id & 0xFF))
+		map.put(1, (byte) (vlan_id >> 8 & 0xFF))
 		map.put(0, (byte) 2)
 		while(map.get(0));
 	}
@@ -81,7 +78,7 @@ class Matrix_mmem {
 	}
 	
 	protected def map_pixel(int x, int y) {
-		pixel_cord c
+		def c = new pixel_cord()
 		c.x = x % cols
 		c.y = (x / cols * 16) + (y % 16)
 		return c
@@ -91,7 +88,12 @@ class Matrix_mmem {
 	protected int rows
 	protected int cols
 	
-	protected class pixel_cord {
+	class pixel_cord {
+		pixel_cord() {
+			x = 0
+			y = 0
+		}
+		
 		int x
 		int y
 	}
