@@ -28,11 +28,13 @@ class Matrix {
 		isNet = true
 		def s = new Socket(addr, 8080)
 		s.withStreams { istream, ostream ->
-			def data = [0x09, 0x20, 0x20, 0x21, 2, 0 ] as byte[]
+			def data = [0x21, 0x20, 0x20, 0x09, 2, 0, 0, 0 ] as byte[]
 			ostream.write(data, 0, data.size())
 			ostream.flush()
+			while(istream.available() < 4);
 			istream.read(data, 0, 4)
 			cols = data[3] << 24 | data[2] << 16 | data[1] << 8 | data[0]
+			while(istream.available() < 4);
 			istream.read(data, 0, 4)
 			rows = data[3] << 24 | data[2] << 16 | data[1] << 8 | data[0]
 		}
@@ -55,7 +57,7 @@ class Matrix {
 		else {
 			def s = new Socket(addr, 8080)
 			s.withStreams { istream, ostream ->
-				def data = [0x09, 0x20, 0x20, 0x21, 1, 0 ] as byte[]
+				def data = [0x21, 0x20, 0x20, 0x09, 1, 0, 0, 0 ] as byte[]
 				ostream.write(data, 0, data.size())
 				ostream.flush()
 			}
@@ -73,7 +75,7 @@ class Matrix {
 		else {
 			def s = new Socket(addr, 8080)
 			s.withStreams { istream, ostream ->
-				def data = [0x09, 0x20, 0x20, 0x21, 0, 2, vlan_id, vlan_id >> 8] as byte[]
+				def data = [0x21, 0x20, 0x20, 0x09, 0, 2, 0, 0, vlan_id, vlan_id >> 8] as byte[]
 				ostream.write(data, 0, data.size())
 				ostream.flush()
 			}
@@ -96,7 +98,7 @@ class Matrix {
 			def v = y * rows + x as int
 			def s = new Socket(addr, 8080)
 			s.withStreams { istream, ostream ->
-				def data = [0x09, 0x20, 0x20, 0x21, 3, 7, v, v >> 8, v >> 16, v >> 24, pixel.red, pixel.green, pixel.blue] as byte[]
+				def data = [0x21, 0x20, 0x20, 0x09, 3, 7, 0, 0, v, v >> 8, v >> 16, v >> 24, pixel.red, pixel.green, pixel.blue] as byte[]
 				ostream.write(data, 0, data.size())
 				ostream.flush()
 			}
@@ -112,7 +114,7 @@ class Matrix {
 			def v = y * rows + x as int
 			def s = new Socket(addr, 8080)
 			s.withStreams { istream, ostream ->
-				def data = [0x09, 0x20, 0x20, 0x21, 3, 4 + (pixels.size() * 3), v, v >> 8, v >> 16, v >> 24] as byte[]
+				def data = [0x21, 0x20, 0x20, 0x09, 3, 4 + (pixels.size() * 3), 0, 0, v, v >> 8, v >> 16, v >> 24] as byte[]
 				ostream.write(data, 0, data.size())
 				ostream.flush()
 				for (Matrix_RGB_t pixel : pixels) {
@@ -141,7 +143,7 @@ class Matrix {
 		else {
 			def s = new Socket(addr, 8080)
 			s.withStreams { istream, ostream ->
-				def data = [0x09, 0x20, 0x20, 0x21, 5, 3, pixel.red, pixel.green, pixel.blue] as byte[]
+				def data = [0x21, 0x20, 0x20, 0x09, 5, 3, 0, 0, pixel.red, pixel.green, pixel.blue] as byte[]
 				ostream.write(data, 0, data.size())
 				ostream.flush()
 			}
@@ -162,7 +164,7 @@ class Matrix {
 		else {
 			def s = new Socket(addr, 8080)
 			s.withStreams { istream, ostream ->
-				def data = [0x09, 0x20, 0x20, 0x21, 6, 1, brightness] as byte[]
+				def data = [0x21, 0x20, 0x20, 0x09, 6, 1, 0, 0, brightness] as byte[]
 				ostream.write(data, 0, data.size())
 				ostream.flush()
 			}
