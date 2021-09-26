@@ -88,7 +88,7 @@ class Matrix {
 	protected int rows
 	protected int cols
 	
-	class pixel_cord {
+	protected class pixel_cord {
 		pixel_cord() {
 			x = 0
 			y = 0
