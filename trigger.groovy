@@ -8,6 +8,9 @@
  * Created on September 19, 2021
  */
 
+import groovy.Matrix;
+import groovy.Matrix_RGB_t;
+
 import java.nio.channels.FileChannel;
 
 // Map shared memory buffer
@@ -47,3 +50,15 @@ while (map.get(0));
 // Trigger send_frame
 map.put(0, (Byte) 1)
 while (map.get(0));
+
+
+// Using Matrix class
+def m = new Matrix()
+def p = new Matrix_RGB_t((byte) 255, (byte) 255, (byte) 255)
+m.set_pixel(0, 0, p)
+m.send_frame()
+m.send_frame(13)
+rows = m.get_rows()
+cols = m.get_columns()
+m.fill(new Matrix_RGB_t((byte) 255, (byte) 255, (byte) 255))
+m.send_frame()
