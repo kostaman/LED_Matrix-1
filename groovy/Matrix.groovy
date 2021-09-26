@@ -23,8 +23,8 @@ class Matrix {
 		isNet = false
 	}
 		
-	Matrix(InetAddress address) {
-		addr = address
+	Matrix(String address) {
+		addr = InetAddress.getByName(address)
 		isNet = true
 		def s = new Socket(addr, 8080)
 		s.withStreams { istream, ostream ->
