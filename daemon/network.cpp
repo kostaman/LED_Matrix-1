@@ -16,7 +16,7 @@
 //#include <thread>
 //using std::thread;
 
-#include "Matrix.h"
+#include "../Matrix.h"
 using LED_Matrix::Matrix;
 using LED_Matrix::Matrix_RGB_t;
 
