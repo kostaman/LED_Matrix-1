@@ -45,7 +45,7 @@ Therefore converting this to something not based in Linux would be straightforwa
 ## Building
 Daemon:
 ```bash
-g++ -O3 Matrix.cpp network.cpp main.cpp -o Matrix -lpthread
+g++ -O3 Matrix.cpp daemon/network.cpp daemon/main.cpp -o Matrix -lpthread
 ```
 Demo:
 ```bash
