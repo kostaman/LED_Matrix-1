@@ -84,18 +84,38 @@ class Matrix {
 	}
 	
 	def set_pixel(int x, int y, Matrix_RGB_t pixel) {
+		x %= get_columns()
+		y %= get_rows()
 		def c = map_pixel(x, y)
 		set_pixel_raw(c.x, c.y, pixel)
 	}
 	
+	def set_pixel(int x, int y, Matrix_RGB_t[] pixels) {
+		if (!isNet) {
+			def v = y * get_columns() + x as int
+			for (Matrix_RGB_t pixel : pixels) {
+				v %= rows * cols
+				x = v % get_columns()
+				y = v / get_columns()
+				set_pixel(x, y, pixel)
+				v++
+			}
+		}
+		else
+			throw new Exception("Setting multiple pixels over TCP/network is only supported using set_pixel_raw")
+	}
+	
 	def set_pixel_raw(int x, int y, Matrix_RGB_t pixel) {
 		if (!isNet) {
+			x %= cols
+			y %= rows
 			map.put(y * cols + x + 4, pixel.red)
 			map.put(y * cols + x + 5, pixel.green)
 			map.put(y * cols + x + 6, pixel.blue)
 		}
 		else {
-			def v = y * rows + x as int
+			def v = y * cols + x as int
+			v %= rows * cols
 			def s = new Socket(addr, 8080)
 			s.withStreams { istream, ostream ->
 				def data = [0x21, 0x20, 0x20, 0x09, 3, 7, 0, 0, v, v >> 8, v >> 16, v >> 24, pixel.red, pixel.green, pixel.blue] as byte[]
@@ -106,13 +126,23 @@ class Matrix {
 		}
 	}
 	
-	def set_pixel(int x, int y, Matrix_RGB_t[] pixels) {
-		if (!isNet)
-			for (Matrix_RGB_t pixel : pixels)
-				set_pixel(x, y, pixel)
+	def set_pixel_raw(int x, int y, Matrix_RGB_t[] pixels) {
+		def v = y * cols + x as int
+		v %= rows * cols
+		if (!isNet) {
+			for (Matrix_RGB_t pixel : pixels) {
+				x = v % get_columns()
+				y = v / get_columns()
+				set_pixel_raw(x, y, pixel)
+				v++
+				v %= rows * cols
+			}
+		}
 		else {
-			def v = y * rows + x as int
 			def s = new Socket(addr, 8080)
+			// TODO: Fix bug pixel.size() larger than 83
+			if (pixels.size() > 83)
+				throw new Exception("Currently cannot pass more than 83 pixels at a time to set_pixel_raw over TCP/network")
 			s.withStreams { istream, ostream ->
 				def data = [0x21, 0x20, 0x20, 0x09, 3, 4 + (pixels.size() * 3), 0, 0, v, v >> 8, v >> 16, v >> 24] as byte[]
 				ostream.write(data, 0, data.size())
