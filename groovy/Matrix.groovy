@@ -90,7 +90,7 @@ class Matrix {
 		set_pixel_raw(c.x, c.y, pixel)
 	}
 	
-	def set_pixel(int x, int y, Matrix_RGB_t[] pixels) {
+	def set_pixel(int x, int y, Matrix_RGB_t[] pixels) {	// TODO: Test
 		if (!isNet) {
 			def v = y * get_columns() + x as int
 			for (Matrix_RGB_t pixel : pixels) {
@@ -126,7 +126,7 @@ class Matrix {
 		}
 	}
 	
-	def set_pixel_raw(int x, int y, Matrix_RGB_t[] pixels) {
+	def set_pixel_raw(int x, int y, Matrix_RGB_t[] pixels) {	// TODO: Test
 		def v = y * cols + x as int
 		v %= rows * cols
 		if (!isNet) {
@@ -150,7 +150,7 @@ class Matrix {
 				for (Matrix_RGB_t pixel : pixels) {
 					data[0] = pixel.red
 					data[1] = pixel.green
-					data[2] = pixel.bleu
+					data[2] = pixel.blue
 					ostream.write(data, 0, 3)
 					ostream.flush()
 				}
