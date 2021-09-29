@@ -36,12 +36,12 @@ class Matrix {
 		void send_frame();
 		void send_frame(uint16_t vlan_id);
 		
-		void set_pixel(uint32_t x, uint32_t y, Matrix_RGB_t pixel);
+		void set_pixel(uint32_t x, uint32_t y, Matrix_RGB_t &pixel);
 		void set_pixel(uint32_t x, uint32_t y, Matrix_RGB_t *pixels, uint8_t len);
-		void set_pixel_raw(uint32_t x, uint32_t y, Matrix_RGB_t pixel);
+		void set_pixel_raw(uint32_t x, uint32_t y, Matrix_RGB_t &pixel);
 		void set_pixel_raw(uint32_t x, uint32_t y, Matrix_RGB_t *pixels, uint8_t len);
 		
-		void fill(Matrix_RGB_t pixel);
+		void fill(Matrix_RGB_t &pixel);
 		void clear();
 		
 		void set_brightness(uint8_t brightness);
