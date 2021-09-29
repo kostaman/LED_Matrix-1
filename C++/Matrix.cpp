@@ -13,6 +13,7 @@
  #include <errno.h>
  #include <sys/socket.h>
  #include <arpa/inet.h>
+ #include "Matrix.h"
  
  Matrix::Matrix() {
  	struct stat st;
