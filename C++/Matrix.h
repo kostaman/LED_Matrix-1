@@ -12,6 +12,7 @@
 #include <stdint.h>
 
 struct Matrix_RGB_t {
+	Matrix_RGB_t() : red(0), green(0), blue(0) { }
 	Matrix_RGB_t(uint8_t r, uint8_t g, uint8_t b) {
 		red = r;
 		green = g;
@@ -27,6 +28,7 @@ class Matrix {
 	public:
 		Matrix();
 		Matrix(char *address);
+		~Matrix();
 			
 		virtual uint32_t get_rows() { return 16; }
 		virtual uint32_t get_columns() { return 128; }
@@ -35,9 +37,9 @@ class Matrix {
 		void send_frame(uint16_t vlan_id);
 		
 		void set_pixel(uint32_t x, uint32_t y, Matrix_RGB_t pixel);
-		void set_pixel(uint32_t x, uint32_t y, Matrix_RGB_t *pixels);
+		void set_pixel(uint32_t x, uint32_t y, Matrix_RGB_t *pixels, uint8_t len);
 		void set_pixel_raw(uint32_t x, uint32_t y, Matrix_RGB_t pixel);
-		void set_pixel_raw(uint32_t x, uint32_t y, Matrix_RGB_t *pixels);
+		void set_pixel_raw(uint32_t x, uint32_t y, Matrix_RGB_t *pixels, uint8_t len);
 		
 		void fill(Matrix_RGB_t pixel);
 		void clear();
@@ -45,13 +47,26 @@ class Matrix {
 		void set_brightness(uint8_t brightness);
 	
 	protected: 
-		virtual void map_pixel(int *x, int *y);
+		virtual void map_pixel(uint32_t *x, uint32_t *y);
 	
 		int fd;
-		char *addr;
+		char *address;
+		volatile uint8_t *ptr;
 		uint32_t rows;
 		uint32_t cols;
 		bool isNet;
+		
+		const uint32_t marker = 0x09202021;
+	
+	private:
+		struct packet {
+			uint32_t marker;
+			uint8_t command;
+			uint8_t size;
+		};
+	
+		void connect();
+		void transfer(int client, bool out, void *ptr, uint32_t len);
 };
 
 #endif	/* Matrix_H */
