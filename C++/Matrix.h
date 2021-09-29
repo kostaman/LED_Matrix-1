@@ -65,7 +65,7 @@ class Matrix {
 			uint8_t size;
 		};
 	
-		void connect();
+		void open_socket();
 		void transfer(int client, bool out, void *ptr, uint32_t len);
 };
 
