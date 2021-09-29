@@ -30,12 +30,12 @@ map.put(2, (Byte) 13)
 map.put(0, (Byte) 2)
 while (map.get(0));
 
-// Get the number of Columns
+// Get the number of Rows
 map.put(0, (Byte) 3)
 while (map.get(0));
 def rows = (map.get(2) << 8) + map.get(3)
 
-// Get the number of Rows
+// Get the number of Columns
 map.put(0, (Byte) 4)
 while (map.get(0));
 def cols = (map.get(2) << 8) + map.get(3)
