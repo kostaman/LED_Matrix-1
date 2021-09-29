@@ -77,7 +77,9 @@
  		p.command = 1;
  		p.marker = marker;
  		p.size = 0;
+ 		connect();
  		transfer(fd, true, &p, sizeof(p));
+ 		close(fd);
  	}
  }
  
@@ -94,30 +96,90 @@
  		p.command = 0;
  		p.marker = marker;
  		p.size = 2;
+ 		connect();
  		transfer(fd, true, &p, sizeof(p));
  		transfer(fd, true, &vlan_id, p.size);
+ 		close(fd);
  	}
  
  }
  
-void Matrix::set_pixel(uint32_t x, uint32_t y, Matrix_RGB_t pixel) {
-
+void Matrix::set_pixel(uint32_t x, uint32_t y, Matrix_RGB_t &pixel) {
+	map(&x, &y);
+	set_pixel_raw(x, y, pixel);
 }
 
 void Matrix::set_pixel(uint32_t x, uint32_t y, Matrix_RGB_t *pixels, uint8_t len) {
-
+	map(&x, &y);
+	set_pixel_raw(x, y, pixels, len);
 }
 
-void Matrix::set_pixel_raw(uint32_t x, uint32_t y, Matrix_RGB_t pixel) {
-
+void Matrix::set_pixel_raw(uint32_t x, uint32_t y, Matrix_RGB_t &pixel) {
+	packet p;
+	uint32_t val = y * cols + x;
+	
+	if (!isNet) {
+		*(ptr + 4 + val) = pixel.red;
+		*(ptr + 5 + val) = pixel.green;
+		*(ptr + 6 + val) = pixel.blue;
+	}
+	else {
+		p.command = 3;
+		p.marker = marker;
+		p.size = 7;
+		connect();
+		transfer(fd, true, &p, sizeof(p));
+		transfer(fd, true, &val, sizeof(val));
+		transfer(fd, true, &pixels, 3);
+		close(fd);
+	}
 }
 
 void Matrix::set_pixel_raw(uint32_t x, uint32_t y, Matrix_RGB_t *pixels, uint8_t len) {
-
+	packet p;
+	uint32_t val = y * cols + x;
+	
+	if (!isNet) {
+		for (int i = 0; i < len; i++) {
+			x = val % cols;
+			y = val / cols;
+			set_pixel_raw(x, y, pixels[i]);
+			val++;
+		}
+	}
+	else {
+		if (len > 83)
+			throw len;
+		p.command = 3;
+		p.marker = marker;
+		p.size = len * 3 + 4;
+		connect();
+		transfer(fd, true, &p, sizeof(p));
+		transfer(fd, true, &val, sizeof(val));
+		transfer(fd, true, pixels, len * 3);
+		close(fd);
+	}
 }
 		
-void Matrix::fill(Matrix_RGB_t pixel) {
-
+void Matrix::fill(Matrix_RGB_t &pixel) {
+	packet p;
+	
+	if (!isNet) {
+		*(ptr + 1) = pixel.red;
+		*(ptr + 2) = pixel.green;
+		*(ptr + 3) = pixel.blue;
+		*ptr = 6;
+		while(*ptr);
+	}
+	else  {
+		p.command = 5;
+		p.marker = marker;
+		p.size = sizeof(pixel);
+		connect();
+		transfer(fd, true, &p, sizeof(p));
+		transfer(fd, true, &pixel, p.size);
+		close(fd);
+	}
 }
 
 void Matrix::clear() {
@@ -126,7 +188,22 @@ void Matrix::clear() {
 }
 		
 void Matrix::set_brightness(uint8_t brightness) {
+	packet p;
 
+	if (!isNet) {
+		*(ptr + 1) = brightness;
+		*ptr = 5;
+		while(*ptr);
+	}
+	else {
+		p.command = 6;
+		p.marker = marker;
+		p.size = 1;
+		connect();
+		transfer(fd, true, &p, sizeof(p));
+		transfer(fd, true, &brightness, p.size);
+		close(fd);
+	}
 }
 
 inline void Matrix::map_pixel(uint32_t *x, uint32_t *y) {
