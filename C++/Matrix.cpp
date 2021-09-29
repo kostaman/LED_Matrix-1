@@ -13,6 +13,8 @@
  #include <errno.h>
  #include <sys/socket.h>
  #include <arpa/inet.h>
+ #include <fcntl.h>
+ #include <string.h>
  #include "Matrix.h"
  
  Matrix::Matrix() {
@@ -46,7 +48,7 @@
 	address = addr;
 	isNet = true;
 	
-	connect();
+	open_socket();
 	transfer(fd, true, &p, sizeof(p));
 	transfer(fd, false, data, 8);
 	close(fd);
@@ -63,7 +65,7 @@
  	else {
  		fstat(fd, &st);
  		close(fd);
- 		unmap((void *) ptr, st.st_size);
+ 		munmap((void *) ptr, st.st_size);
  	}
  }
  
@@ -78,7 +80,7 @@
  		p.command = 1;
  		p.marker = marker;
  		p.size = 0;
- 		connect();
+ 		open_socket();
  		transfer(fd, true, &p, sizeof(p));
  		close(fd);
  	}
@@ -97,7 +99,7 @@
  		p.command = 0;
  		p.marker = marker;
  		p.size = 2;
- 		connect();
+ 		open_socket();
  		transfer(fd, true, &p, sizeof(p));
  		transfer(fd, true, &vlan_id, p.size);
  		close(fd);
@@ -106,12 +108,12 @@
  }
  
 void Matrix::set_pixel(uint32_t x, uint32_t y, Matrix_RGB_t &pixel) {
-	map(&x, &y);
+	map_pixel(&x, &y);
 	set_pixel_raw(x, y, pixel);
 }
 
 void Matrix::set_pixel(uint32_t x, uint32_t y, Matrix_RGB_t *pixels, uint8_t len) {
-	map(&x, &y);
+	map_pixel(&x, &y);
 	set_pixel_raw(x, y, pixels, len);
 }
 
@@ -128,10 +130,10 @@ void Matrix::set_pixel_raw(uint32_t x, uint32_t y, Matrix_RGB_t &pixel) {
 		p.command = 3;
 		p.marker = marker;
 		p.size = 7;
-		connect();
+		open_socket();
 		transfer(fd, true, &p, sizeof(p));
 		transfer(fd, true, &val, sizeof(val));
-		transfer(fd, true, &pixels, 3);
+		transfer(fd, true, &pixel, 3);
 		close(fd);
 	}
 }
@@ -154,7 +156,7 @@ void Matrix::set_pixel_raw(uint32_t x, uint32_t y, Matrix_RGB_t *pixels, uint8_t
 		p.command = 3;
 		p.marker = marker;
 		p.size = len * 3 + 4;
-		connect();
+		open_socket();
 		transfer(fd, true, &p, sizeof(p));
 		transfer(fd, true, &val, sizeof(val));
 		transfer(fd, true, pixels, len * 3);
@@ -176,7 +178,7 @@ void Matrix::fill(Matrix_RGB_t &pixel) {
 		p.command = 5;
 		p.marker = marker;
 		p.size = sizeof(pixel);
-		connect();
+		open_socket();
 		transfer(fd, true, &p, sizeof(p));
 		transfer(fd, true, &pixel, p.size);
 		close(fd);
@@ -184,7 +186,7 @@ void Matrix::fill(Matrix_RGB_t &pixel) {
 }
 
 void Matrix::clear() {
-	Matrix_RGB_t p();
+	Matrix_RGB_t p;
 	fill(p);
 }
 		
@@ -200,7 +202,7 @@ void Matrix::set_brightness(uint8_t brightness) {
 		p.command = 6;
 		p.marker = marker;
 		p.size = 1;
-		connect();
+		open_socket();
 		transfer(fd, true, &p, sizeof(p));
 		transfer(fd, true, &brightness, p.size);
 		close(fd);
@@ -214,7 +216,7 @@ inline void Matrix::map_pixel(uint32_t *x, uint32_t *y) {
 	*y = y2;
 }
 
-void Matrix::connect() {
+void Matrix::open_socket() {
 	struct sockaddr_in serv_addr; 
 	packet p;
 	
