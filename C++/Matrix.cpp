@@ -31,11 +31,11 @@
 		
 	*ptr = 3;
 	while(*ptr);
-	rows = *(ptr + 2) << 8 + *(ptr + 3);
+	rows = (*(ptr + 2) << 8) + *(ptr + 3);
 		
 	*ptr = 4;
 	while(*ptr);
-	cols = *(ptr + 2) << 8 + *(ptr + 3);
+	cols = (*(ptr + 2) << 8) + *(ptr + 3);
  }
  
  Matrix::Matrix(char *addr) {
