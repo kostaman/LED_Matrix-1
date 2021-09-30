@@ -65,7 +65,7 @@ gcc -O3 trigger_remote.c -o trigger_remote
 Trigger Remote (C++):
 ```bash
 cd trigger
-gcc -O3 trigger_remote.cpp -o trigger_remote
+gcc -O3 trigger_remote.cpp ../C++/Matrix.cpp -o trigger_remote
 ```
 
 ## Running
