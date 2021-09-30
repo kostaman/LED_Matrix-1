@@ -68,20 +68,6 @@ Matrix::Matrix(const char *iface, uint32_t r, uint32_t c) : rows(r), cols(c) {
 		throw errno;
 }
 
-inline void Matrix::map(uint32_t *x, uint32_t *y) {
-	uint32_t x2 = *x % cols;
-	uint32_t y2 = (*x / cols * 16) + (*y % 16);
-	*x = x2;
-	*y = y2;
-}
-
-void Matrix::set_pixel(uint32_t x, uint32_t y, Matrix_RGB_t pixel) {
-	map(&x, &y);
-	y %= rows;
-	x %= cols;
-    	*(buffer + (y * cols) + x) = pixel;
-}
-
 void Matrix::set_pixel_raw(uint32_t x, uint32_t y, Matrix_RGB_t pixel) {
 	y %= rows;
 	x %= cols;
