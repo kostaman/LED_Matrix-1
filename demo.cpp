@@ -10,18 +10,12 @@
  *
  * Warning: This still need a lot of work.
  *
- * Note: This uses Matrix class directly which requires super user priviledges. This may not be desirable and questionable practice.
- *	Daemon logic exists which would prevent this. Daemon would need priviledges while application logic does not when using shared
- *	 memory or socket comms to daemon. Only use this Matrix class directly when explicitly needed or for trivial things.
- *	Daemon communication does represent some overhead, shared memory should be much lower, however has potential drawbacks. Overall
- *	 the impact to display and rest of system for this code base should be minimal. However this can depend on use case, as some
- *	 exceptions are possible.
- *
  * Modifications:
  *	9/21/21 - David Thacher: Ported to work with https://github.com/daveythacher/LED_Matrix
 					Removed classes BrightnessPulseGenerator, GeneticColors, SimpleSquare, VolumeBars, ImageScroller
  *	9/22/21 - David Thacher: Ported BrightnessPulseGenerator
  *	9/24/21 - David Thacher: Ported ImageScroller, some characters are blurry in runtext16.ppm (I am suspecting issue with test file)
+ *	9/30/21 - David Thacher: Switched to daemon logic. (Currently uses shared memory.)
  */
 
 #include <assert.h>
@@ -35,9 +29,7 @@
 #include <unistd.h>
 #include <time.h>
 
-#include "Matrix.h"
-using LED_Matrix::Matrix;
-using LED_Matrix::Matrix_RGB_t;
+#include "C++/Matrix.h"
 
 #include <algorithm>
 using std::min;
@@ -711,7 +703,7 @@ private:
 };
 
 static int usage(const char *progname) {
-  fprintf(stderr, "usage: sudo %s <options> -D <demo num>\n", progname);
+  fprintf(stderr, "usage: %s <options> -D <demo num>\n", progname);
   fprintf(stderr, "Options:\n");
   fprintf(stderr,
           "\t-D <demo num>\t-\tAlways needs to be set\n");
@@ -725,7 +717,7 @@ static int usage(const char *progname) {
           "\t7  - Conway's game of life (-m <time-step-ms>)\n"
           "\t8  - Langton's ant (-m <time-step-ms>)\n"
           "\t11 - Brightness pulse generator\n");
-  fprintf(stderr, "Example:\n\tsudo %s -D 0\n", progname);
+  fprintf(stderr, "Example:\n\t%s -D 0\n", progname);
   return 1;
 }
 
@@ -735,7 +727,7 @@ int main(int argc, char *argv[]) {
   int scroll_ms = 30;
   DemoRunner *demo_runner;
   const char *demo_parameter = NULL;
-  Matrix *m = new Matrix("ens33", 64, 32);
+  Matrix *m = new Matrix();
   
   while ((opt = getopt(argc, argv, "dD:r:P:c:p:b:m:LR:")) != -1) {
     switch (opt) {
