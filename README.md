@@ -45,19 +45,27 @@ Therefore converting this to something not based in Linux would be straightforwa
 ## Building
 Daemon:
 ```bash
-g++ -O3 Matrix.cpp daemon/network.cpp daemon/main.cpp -o Matrix -lpthread
+cd daemon
+g++ -O3 Matrix.cpp network.cpp main.cpp -o Matrix -lpthread
 ```
 Demo:
 ```bash
-g++ -O3 Matrix.cpp demo.cpp -o demo
+g++ -O3 C++/Matrix.cpp demo.cpp -o demo
 ```
 Trigger (C++):
 ```bash
+cd trigger
 g++ -O3 trigger.cpp -o trigger
 ```
 Trigger Remote (C):
 ```bash
+cd trigger
 gcc -O3 trigger_remote.c -o trigger_remote
+```
+Trigger Remote (C++):
+```bash
+cd trigger
+gcc -O3 trigger_remote.cpp -o trigger_remote
 ```
 
 ## Running
