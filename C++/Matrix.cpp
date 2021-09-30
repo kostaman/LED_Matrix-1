@@ -107,7 +107,7 @@
  
  }
  
-void Matrix::set_pixel(uint32_t x, uint32_t y, Matrix_RGB_t &pixel) {
+void Matrix::set_pixel(uint32_t x, uint32_t y, Matrix_RGB_t pixel) {
 	map_pixel(&x, &y);
 	set_pixel_raw(x, y, pixel);
 }
@@ -117,7 +117,7 @@ void Matrix::set_pixel(uint32_t x, uint32_t y, Matrix_RGB_t *pixels, uint8_t len
 	set_pixel_raw(x, y, pixels, len);
 }
 
-void Matrix::set_pixel_raw(uint32_t x, uint32_t y, Matrix_RGB_t &pixel) {
+void Matrix::set_pixel_raw(uint32_t x, uint32_t y, Matrix_RGB_t pixel) {
 	packet p;
 	uint32_t val = y * cols + x;
 	
@@ -164,7 +164,7 @@ void Matrix::set_pixel_raw(uint32_t x, uint32_t y, Matrix_RGB_t *pixels, uint8_t
 	}
 }
 		
-void Matrix::fill(Matrix_RGB_t &pixel) {
+void Matrix::fill(Matrix_RGB_t pixel) {
 	packet p;
 	
 	if (!isNet) {
