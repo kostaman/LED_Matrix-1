@@ -105,61 +105,6 @@ class Matrix {
 			throw new Exception("Setting multiple pixels over TCP/network is only supported using set_pixel_raw")
 	}
 	
-	def set_pixel_raw(int x, int y, Matrix_RGB_t pixel) {
-		if (!isNet) {
-			x %= cols
-			y %= rows
-			map.put(y * cols + x + 4, pixel.red)
-			map.put(y * cols + x + 5, pixel.green)
-			map.put(y * cols + x + 6, pixel.blue)
-		}
-		else {
-			def v = y * cols + x as int
-			v %= rows * cols
-			def s = new Socket(addr, 8080)
-			s.withStreams { istream, ostream ->
-				def data = [0x21, 0x20, 0x20, 0x09, 3, 7, 0, 0, v, v >> 8, v >> 16, v >> 24, pixel.red, pixel.green, pixel.blue] as byte[]
-				ostream.write(data, 0, data.size())
-				ostream.flush()
-			}
-			s.close()
-		}
-	}
-	
-	def set_pixel_raw(int x, int y, Matrix_RGB_t[] pixels) {	// TODO: Test
-		def v = y * cols + x as int
-		v %= rows * cols
-		if (!isNet) {
-			for (Matrix_RGB_t pixel : pixels) {
-				x = v % get_columns()
-				y = v / get_columns()
-				set_pixel_raw(x, y, pixel)
-				v++
-				v %= rows * cols
-			}
-		}
-		else {
-			def s = new Socket(addr, 8080)
-			// TODO: Fix bug pixel.size() larger than 83
-			if (pixels.size() > 83)
-				throw new Exception("Currently cannot pass more than 83 pixels at a time to set_pixel_raw over TCP/network")
-			s.withStreams { istream, ostream ->
-				def data = [0x21, 0x20, 0x20, 0x09, 3, 4 + (pixels.size() * 3), 0, 0, v, v >> 8, v >> 16, v >> 24] as byte[]
-				ostream.write(data, 0, data.size())
-				ostream.flush()
-				for (Matrix_RGB_t pixel : pixels) {
-					data[0] = pixel.red
-					data[1] = pixel.green
-					data[2] = pixel.blue
-					ostream.write(data, 0, 3)
-					ostream.flush()
-				}
-			}
-			s.close()
-		
-		}
-	}
-	
 	def fill(Matrix_RGB_t pixel) {
 		if (!isNet) {
 			for (int y = 0; y < rows; y++) {
@@ -207,6 +152,61 @@ class Matrix {
 		c.x = x % cols
 		c.y = (x / cols * 16) + (y % 16)
 		return c
+	}
+	
+	protected def set_pixel_raw(int x, int y, Matrix_RGB_t pixel) {
+		if (!isNet) {
+			x %= cols
+			y %= rows
+			map.put(y * cols + x + 4, pixel.red)
+			map.put(y * cols + x + 5, pixel.green)
+			map.put(y * cols + x + 6, pixel.blue)
+		}
+		else {
+			def v = y * cols + x as int
+			v %= rows * cols
+			def s = new Socket(addr, 8080)
+			s.withStreams { istream, ostream ->
+				def data = [0x21, 0x20, 0x20, 0x09, 3, 7, 0, 0, v, v >> 8, v >> 16, v >> 24, pixel.red, pixel.green, pixel.blue] as byte[]
+				ostream.write(data, 0, data.size())
+				ostream.flush()
+			}
+			s.close()
+		}
+	}
+	
+	protected def set_pixel_raw(int x, int y, Matrix_RGB_t[] pixels) {	// TODO: Test
+		def v = y * cols + x as int
+		v %= rows * cols
+		if (!isNet) {
+			for (Matrix_RGB_t pixel : pixels) {
+				x = v % get_columns()
+				y = v / get_columns()
+				set_pixel_raw(x, y, pixel)
+				v++
+				v %= rows * cols
+			}
+		}
+		else {
+			def s = new Socket(addr, 8080)
+			// TODO: Fix bug pixel.size() larger than 83
+			if (pixels.size() > 83)
+				throw new Exception("Currently cannot pass more than 83 pixels at a time to set_pixel_raw over TCP/network")
+			s.withStreams { istream, ostream ->
+				def data = [0x21, 0x20, 0x20, 0x09, 3, 4 + (pixels.size() * 3), 0, 0, v, v >> 8, v >> 16, v >> 24] as byte[]
+				ostream.write(data, 0, data.size())
+				ostream.flush()
+				for (Matrix_RGB_t pixel : pixels) {
+					data[0] = pixel.red
+					data[1] = pixel.green
+					data[2] = pixel.blue
+					ostream.write(data, 0, 3)
+					ostream.flush()
+				}
+			}
+			s.close()
+		
+		}
 	}
 	
 	protected MappedByteBuffer map
