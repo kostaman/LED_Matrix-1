@@ -36,6 +36,8 @@ Shared memory was choosen to avoid overhead of other methods. There is a command
 
 Note there is no protection against race conditions and hazards on shared memory. If multiple processors grab there could be problems, however this is not expected to be very common. TCP logic currently processes connections serially one at a time to prevent this issue and possible resource usage issues. Note this is still a work in progress and very lazy.
 
+Matrix classes do not allocate memory. Instead they send the data values to the daemon which does allocate memory via shared memory. Note this shared memory is sent to IO vectors directly. Therefore many race conditions and hazards are possible. Should use proper linux user restrictions and blocking logic to prevent adverse behavior of this. This is the benefit to this approach is that offloading removes impact of inter process communication overhead to system stability. However exceptions due apply still.
+
 Examples of language portability is shown with trigger programs. Currently Matrix class is only implemented on Linux, inorder to use on other systems this would need to be reimplemented or use network daemon running on Linux server. Note other languages could wrap up command interface into its own class wrapper.
 
 This code base is very straight forward, and this logic is fairly light weight. This is due to the significant amount of offloading provided by the ColorLight 5A-75B. Note configuration complexity is also passed off to application logic and ColorLight configuration software. This simplifies the code down to basically a wrapper/interface logic for higher level logic.
@@ -99,13 +101,15 @@ groovy trigger_remote.groovy
 ```
 
 ## Files
-The base of this repo is in Matrix.h and Matrix.cpp. If looking to see how it works or port this to another implementation/platform look there.
+The base of this repo is in Matrix.h and Matrix.cpp in daemon folder. If looking to see how it works or port this to another implementation/platform look there.
 
 For the daemon look at main.cpp (trigger protocol) and network.cpp (TCP protocol). This logic uses Matrix.h and Matrix.cpp, which requires super user priviledge.
 
-For the demo look at demo.cpp. This logic uses Matrix.h and Matrix.cpp, which requires super user priviledge. Note it is recommended to generate logic against daemon where possible.
+For the demo look at demo.cpp. This logic uses Matrix.h and Matrix.cpp in C++ folder, which does not require super user priviledge. Note it is recommended to generate logic against daemon where possible.
 
 The groovy folder contains a Groovy Matrix class which supports both shared memory and TCP socket to daemon. A Java version of this would be easy to make. Later I may add some graphics and possibly mapping logic in Groovy here.
+
+The C++ folder contains a C++ Matrix class which supports both shared memory and TCP socket to dameon. Later I may add some graphics and possibly mapping logic in C++ here.
 
 For the trigger programs look at the respective implementation. Note these only work with daemon. These could be rewritten to support define a complete class which scretely ties into daemon locally or remotely. Note the performance impact of this is unknown.
 
