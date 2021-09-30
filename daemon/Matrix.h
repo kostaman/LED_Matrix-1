@@ -25,21 +25,14 @@ namespace LED_Matrix {
 		public:
 			Matrix(const char *interface, uint32_t rows = 64, uint32_t cols = 32);
 			
-			virtual uint32_t get_rows() { return 16; }
-			virtual uint32_t get_columns() { return 128; }
-			
 			void send_frame();
 			void send_frame(uint16_t vlan_id);
-			
-			void set_pixel(uint32_t x, uint32_t y, Matrix_RGB_t pixel);
 			void set_pixel_raw(uint32_t x, uint32_t y, Matrix_RGB_t pixel);
 			void fill(Matrix_RGB_t pixel);
 			void clear();
 			void set_brightness(uint8_t brightness);
 
-		protected:
-			virtual void map(uint32_t *x, uint32_t *y);
-			
+		protected:			
 			int fd;
 			uint8_t b_raw;
 			uint8_t brightness;
