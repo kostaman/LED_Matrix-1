@@ -30,9 +30,8 @@ class Matrix {
 		Matrix(char *address, uint32_t rows = 16, uint32_t cols = 128);
 		~Matrix();
 			
-		virtual uint32_t get_rows();
-		virtual uint32_t get_columns();
-			
+		uint32_t get_rows();
+		uint32_t get_columns();	
 		void send_frame();
 		void send_frame(uint16_t vlan_id);
 		void set_pixel(uint32_t x, uint32_t y, Matrix_RGB_t pixel);
