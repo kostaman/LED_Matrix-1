@@ -12,7 +12,7 @@ import java.nio.*;
 import java.nio.channels.FileChannel;
 
 class Matrix {
-	Matrix() {
+	Matrix(int rows = 16, int cols = 128) {
 		map = new RandomAccessFile("/tmp/LED_Matrix.mem", "rw").getChannel().map(FileChannel.MapMode.READ_WRITE, 0, new File("/tmp/LED_Matrix.mem").length())
 		map.put(0, (Byte) 3)
 		while (map.get(0));
@@ -21,11 +21,15 @@ class Matrix {
 		while (map.get(0));
 		cols = (map.get(2) << 8) + map.get(3)
 		isNet = false
+		virt_rows = rows
+		virt_cols = cols
 	}
 		
-	Matrix(String address) {
+	Matrix(String address, int rows = 16, int cols = 128) {
 		addr = InetAddress.getByName(address)
 		isNet = true
+		virt_rows = rows
+		virt_cols = cols
 		def s = new Socket(addr, 8080)
 		s.withStreams { istream, ostream ->
 			def data = [0x21, 0x20, 0x20, 0x09, 2, 0, 0, 0 ] as byte[]
@@ -42,11 +46,11 @@ class Matrix {
 	}
 		
 	def get_rows() {
-		return 16
+		return virt_rows
 	}
 	
 	def get_columns() { 
-		return 128
+		return virt_cols
 	}
 		
 	def send_frame() {
@@ -150,7 +154,7 @@ class Matrix {
 	protected def map_pixel(int x, int y) {
 		def c = new pixel_cord()
 		c.x = x % cols
-		c.y = (x / cols * 16) + (y % 16)
+		c.y = (x / cols * virt_rows) + (y % virt_rows)
 		return c
 	}
 	
@@ -213,6 +217,8 @@ class Matrix {
 	protected InetAddress addr
 	protected int rows
 	protected int cols
+	protected int virt_rows
+	protected int virt_cols
 	protected boolean isNet
 	
 	protected class pixel_cord {
