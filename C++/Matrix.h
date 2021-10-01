@@ -26,12 +26,12 @@ struct Matrix_RGB_t {
 
 class Matrix {
 	public:
-		Matrix();
-		Matrix(char *address);
+		Matrix(uint32_t rows = 16, uint32_t cols = 128);
+		Matrix(char *address, uint32_t rows = 16, uint32_t cols = 128);
 		~Matrix();
 			
-		virtual uint32_t get_rows() { return 16; }
-		virtual uint32_t get_columns() { return 128; }
+		virtual uint32_t get_rows();
+		virtual uint32_t get_columns();
 			
 		void send_frame();
 		void send_frame(uint16_t vlan_id);
@@ -51,6 +51,8 @@ class Matrix {
 		volatile uint8_t *ptr;
 		uint32_t rows;
 		uint32_t cols;
+		uint32_t virt_rows;
+		uint32_t virt_cols;
 		bool isNet;
 		
 		const uint32_t marker = 0x09202021;
