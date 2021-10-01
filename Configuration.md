@@ -6,6 +6,8 @@
 ## Daemon
 The daemon needs to be configured with three inputs. Note the TCP port is hard coded to 8080. The first is the name of the Ethernet network interface as reported by ifconfig to be used by the daemon. Next is the number of rows used by the receiver card. Followed by the number of columns used by the receiver card. These must match the configuration settings of the receiver card.
 
+Note wrapper classes will not work without daemon running. Daemon needs to be ran with super user rights. The application logic/wrapper does not require this, and this is the point of the daemon. (To restrict the priviledge scope.) The point of users, kernel, etc. is to not have things running with full control/access. This does create some overhead which in some applications is undesireable, raw source is available for them. In most case with this type of logic there will be little to no impact. The intensive functions which would normally be corrupted by this are relocated off device.
+
 ## Wrapper
 To my knowledge there is no way of converting the panel/cabinet pixel configuration to the desired pixel configuration. This is easily corrected with a mapping function. Currently this requires creating a derived wrapper Matrix class. This requires coding.
 
