@@ -44,6 +44,9 @@ This code base is very straight forward, and this logic is fairly light weight. 
 
 Therefore converting this to something not based in Linux would be straightforward, given it can generate L2 packets.
 
+## Configuration
+See [Configuration](https://github.com/daveythacher/LED_Matrix/blob/main/Configuration.md)
+
 ## Building
 Daemon:
 ```bash
