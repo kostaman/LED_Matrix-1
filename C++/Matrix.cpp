@@ -17,7 +17,7 @@
  #include <string.h>
  #include "Matrix.h"
  
- Matrix::Matrix() {
+ Matrix::Matrix(uint32_t rows, uint32_t cols) : virt_rows(rows), virt_cols(cols) {
  	struct stat st;
  	
  	isNet = false;
@@ -36,9 +36,12 @@
 	*ptr = 4;
 	while(*ptr);
 	cols = (*(ptr + 2) << 8) + *(ptr + 3);
+	
+	if (rows * cols < virt_rows * virt_cols)
+		throw rows * cols; 
  }
  
- Matrix::Matrix(char *addr) {
+ Matrix::Matrix(char *addr, uint32_t rows, uint32_t cols) : virt_rows(rows), virt_cols(cols) {
  	uint32_t data[2];
  	packet p;
  	p.command = 2;
@@ -67,6 +70,14 @@
  		close(fd);
  		munmap((void *) ptr, st.st_size);
  	}
+ }
+ 
+ uint32_t Matrix::get_rows() {
+ 	return virt_rows;
+ }
+ 
+ uint32_t Matrix::get_columns() {
+ 	return virt_cols;
  }
  
  void Matrix::send_frame() {
@@ -211,9 +222,9 @@ void Matrix::set_brightness(uint8_t brightness) {
 
 inline void Matrix::map_pixel(uint32_t *x, uint32_t *y) {
 	uint32_t x2 = *x % cols;
-	uint32_t y2 = (*x / cols * 16) + (*y % 16);
-	*x = x2;
-	*y = y2;
+	uint32_t y2 = (*x / cols * virt_rows) + (*y % virt_rows);
+	*x = x2 % cols;
+	*y = y2 % rows;
 }
 
 void Matrix::open_socket() {
