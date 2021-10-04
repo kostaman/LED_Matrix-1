@@ -91,7 +91,7 @@ Trigger (C++):
 ```
 Trigger (Groovy):
 ```bash
-./trigger.groovy
+./trigger/trigger.groovy
 ```
 Trigger (Python):
 ```bash
@@ -103,7 +103,7 @@ Trigger Remote (C):
 ```
 Trigger Remote (Groovy):
 ```bash
-groovy trigger_remote.groovy
+groovy trigger/trigger_remote.groovy
 ```
 
 ## Files
