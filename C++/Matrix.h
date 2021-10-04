@@ -19,15 +19,15 @@ struct Matrix_RGB_t {
 		blue = b;
 	}
 
-	uint8_t red;
-	uint8_t green;
 	uint8_t blue;
+	uint8_t green;
+	uint8_t red;
 };
 
 class Matrix {
 	public:
-		Matrix(uint32_t rows = 16, uint32_t cols = 128);
-		Matrix(char *address, uint32_t rows = 16, uint32_t cols = 128);
+		Matrix(uint32_t r = 16, uint32_t c = 128);
+		Matrix(char *address, uint32_t r = 16, uint32_t c = 128);
 		~Matrix();
 			
 		uint32_t get_rows();
