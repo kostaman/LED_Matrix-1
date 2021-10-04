@@ -17,7 +17,7 @@
  #include <string.h>
  #include "Matrix.h"
  
- Matrix::Matrix(uint32_t rows, uint32_t cols) : virt_rows(rows), virt_cols(cols) {
+ Matrix::Matrix(uint32_t r, uint32_t c) : virt_rows(r), virt_cols(c) {
  	struct stat st;
  	
  	isNet = false;
@@ -41,7 +41,7 @@
 		throw rows * cols; 
  }
  
- Matrix::Matrix(char *addr, uint32_t rows, uint32_t cols) : virt_rows(rows), virt_cols(cols) {
+ Matrix::Matrix(char *addr, uint32_t r, uint32_t c) : virt_rows(r), virt_cols(c) {
  	uint32_t data[2];
  	packet p;
  	p.command = 2;
@@ -130,13 +130,11 @@ void Matrix::set_pixel(uint32_t x, uint32_t y, Matrix_RGB_t *pixels, uint8_t len
 
 void Matrix::set_pixel_raw(uint32_t x, uint32_t y, Matrix_RGB_t pixel) {
 	packet p;
-	uint32_t val = y * cols + x;
+	Matrix_RGB_t *buffer = (Matrix_RGB_t *) (ptr + 4);
+	uint32_t val = (y * cols) + x;
 	
-	if (!isNet) {
-		*(ptr + 4 + val) = pixel.red;
-		*(ptr + 5 + val) = pixel.green;
-		*(ptr + 6 + val) = pixel.blue;
-	}
+	if (!isNet)
+		*(buffer + val) = pixel;
 	else {
 		p.command = 3;
 		p.marker = marker;
@@ -222,9 +220,22 @@ void Matrix::set_brightness(uint8_t brightness) {
 
 inline void Matrix::map_pixel(uint32_t *x, uint32_t *y) {
 	uint32_t x2 = *x % cols;
-	uint32_t y2 = (*x / cols * virt_rows) + (*y % virt_rows);
-	*x = x2 % cols;
-	*y = y2 % rows;
+	uint32_t y2 = (*y % virt_rows);
+	switch (*x / cols) {
+		case 0:
+			y2 += virt_rows * 3;
+			break;
+		case 1:
+			y2 += virt_rows * 2;
+			break;
+		case 2:
+			y2 += virt_rows;
+			break;
+		default:
+			break;
+	}
+	*x = x2;
+	*y = y2;
 }
 
 void Matrix::open_socket() {
