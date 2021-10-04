@@ -12,7 +12,7 @@ import java.nio.*;
 import java.nio.channels.FileChannel;
 
 class Matrix {
-	Matrix(int rows = 16, int cols = 128) {
+	Matrix(int r = 16, int c = 128) {
 		map = new RandomAccessFile("/tmp/LED_Matrix.mem", "rw").getChannel().map(FileChannel.MapMode.READ_WRITE, 0, new File("/tmp/LED_Matrix.mem").length())
 		map.put(0, (Byte) 3)
 		while (map.get(0));
@@ -21,15 +21,15 @@ class Matrix {
 		while (map.get(0));
 		cols = (map.get(2) << 8) + map.get(3)
 		isNet = false
-		virt_rows = rows
-		virt_cols = cols
+		virt_rows = r
+		virt_cols = c
 	}
 		
-	Matrix(String address, int rows = 16, int cols = 128) {
+	Matrix(String address, int r = 16, int c = 128) {
 		addr = InetAddress.getByName(address)
 		isNet = true
-		virt_rows = rows
-		virt_cols = cols
+		virt_rows = r
+		virt_cols = c
 		def s = new Socket(addr, 8080)
 		s.withStreams { istream, ostream ->
 			def data = [0x21, 0x20, 0x20, 0x09, 2, 0, 0, 0 ] as byte[]
@@ -55,6 +55,7 @@ class Matrix {
 		
 	def send_frame() {
 		if (!isNet) {
+			map.force()
 			map.put(0, (byte) 1)
 			while(map.get(0));
 		}
@@ -88,8 +89,6 @@ class Matrix {
 	}
 	
 	def set_pixel(int x, int y, Matrix_RGB_t pixel) {
-		x %= get_columns()
-		y %= get_rows()
 		def c = map_pixel(x, y)
 		set_pixel_raw(c.x, c.y, pixel)
 	}
@@ -113,9 +112,9 @@ class Matrix {
 		if (!isNet) {
 			for (int y = 0; y < rows; y++) {
 				for (int x = 0; x < cols; x++) {
-					map.put(y * cols + x + 4, pixel.red)
-					map.put(y * cols + x + 5, pixel.green)
-					map.put(y * cols + x + 6, pixel.blue)
+					map.put(3 * (y * cols + x) + 4, pixel.blue)
+					map.put(3 * (y * cols + x) + 5, pixel.green)
+					map.put(3 * (y * cols + x) + 6, pixel.red)
 				}
 			}
 		}
@@ -153,18 +152,27 @@ class Matrix {
 	
 	protected def map_pixel(int x, int y) {
 		def c = new pixel_cord()
-		c.x = x % cols
-		c.y = (x / cols * virt_rows) + (y % virt_rows)
+		switch (x / cols) {
+			case 0:
+				c.y += virt_rows * 3;
+				break;
+			case 1:
+				c.y += virt_rows * 2;
+				break;
+			case 2:
+				c.y += virt_rows;
+				break;
+			default:
+				break;
+		}
 		return c
 	}
 	
 	protected def set_pixel_raw(int x, int y, Matrix_RGB_t pixel) {
 		if (!isNet) {
-			x %= cols
-			y %= rows
-			map.put(y * cols + x + 4, pixel.red)
-			map.put(y * cols + x + 5, pixel.green)
-			map.put(y * cols + x + 6, pixel.blue)
+			map.put(3 * (y * cols + x) + 4, pixel.blue)
+			map.put(3 * (y * cols + x) + 5, pixel.green)
+			map.put(3 * (y * cols + x) + 6, pixel.red)
 		}
 		else {
 			def v = y * cols + x as int
@@ -209,7 +217,6 @@ class Matrix {
 				}
 			}
 			s.close()
-		
 		}
 	}
 	
