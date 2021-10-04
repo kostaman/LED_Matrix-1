@@ -1,3 +1,5 @@
+#!/usr/bin/env groovy
+
 /* 
  * File:   trigger_remote.groovy
  * Author: David Thacher
@@ -12,8 +14,10 @@ import groovy.Matrix_RGB_t;
 // Using Matrix class
 def m = new Matrix("127.0.0.1")
 def p = new Matrix_RGB_t((byte) 255, (byte) 255, (byte) 255)
+m.clear()
 m.set_pixel(0, 0, p)
 m.send_frame()
+sleep(3000)
 m.send_frame(13)
 rows = m.get_rows()
 cols = m.get_columns()
