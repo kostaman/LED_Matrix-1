@@ -15,9 +15,7 @@
 #include <stdio.h>
 #include <time.h>
 #include "C++/Matrix.h"
-extern "C" {
-	#include "font8x8_basic.h"
-}
+#include "font8x8_basic.h"
 
 const int flag = 0;
 
