@@ -130,15 +130,19 @@ Other applications also likely exist which may want this. Nice thing here is you
 There are several APIs for graphics processing in Java, QT, etc. Then there is OpenGL which is usually available. Granted this requires Linux and potentially higher end hardware on the server. However this may be easier/enable higher end processing function. This should also enable tighter integration functions with more resource consuming loads like 3D graphics, video, fancy web servers, etc. (Perhaps you want to use two NICs or VLAN to prevent the multicast.)
 
 ## Comparison
-Trying to make a 16x128 RGB LED Matrix on PoE is possible using this approach. However other approaches are possible. Note these comparisons are only correct for this specific usage. There is a lot lurking below the covers here too.
+Trying to make a 16x128 RGB LED Matrix on PoE is possible using this approach. However other approaches are possible. Note these comparisons are only correct for this specific usage. There is a lot lurking below the covers here too. Multiple security and other features are available to the receiver card solution. However it does lack some standalone function such as scrolling without server.
 
 ### Raspberry Pi
 The Raspberry Pi supports integrating a server into the box enabling lots of features. The Raspberry Pi saves around 13 to 23 dollars. The Raspberry Pi 2+ has improved stability but suffers higher power consumption. Matrix stability is a concern using the Raspberry Pi without special consideration compared to receiver card. Matrix quality is also a concern using the Raspberry Pi RGB Matrix library, however customizations may be possible to work around this. Quality issues result in reductions of color depth and refresh compared to that of receiver card. The security model for the Raspberry Pi is also a concern which increases risk for power and stability issues outside mitigation control. Note this does not really apply to the receiver card as the server is external.
 
 More than likely all of these issues could be worked around for the most part. However this requires a decent level of understanding of LED Matrixes, Raspberry Pi, Linux, the RGB LED Matrix library, etc. Should the system be deadlocked the display will noticably suffer issues. Granted this is not expected to occur very often if at all depending on usage.
 
+This usage even with the S-PWM update would not be able to use 11 bits for 16x128 at 30 FPS. There is not enough bandwidth at 15.6MHz to support this. The reason the receiver card can is due to the number of IO connectors. This allows each of the four 16x32 LED Matrixes to be driven in parallel. The Raspberry Pi without compute module is not capable of this. Interfacing with a FPGA or MCU is another option which is possibly more expensive compared to receiver card.
+
 ### Microcontroller
 A microcontroller could be used to integrate a server into the box enabling some features available to the Raspberry Pi. This solution is generally more expensive than the receiver card. Stability and quality are not likely an issue for a microcontroller. However multiple microcontrollers are likely required or a stronger microcontroller(s) are required. Power consumption is not expected to be a huge issue for microcontroller(s). The primary benefit to a microcontroller is its security model compared to the Raspberry Pi. Note this does not really apply to the receiver card as the server is external.
+
+In this use case there are only a few MCUs which could cleanly drive a parallel port fast enough. These are significantly more expensive. Likely would require the use of multiple microcontrollers or a FPGA to handle this. Possibly adding even more cost compared to receiver card. Exception to this is RP2040.
 
 ### PWM/MM LED Panels
 It is possible to increase the number of pixels with different LED panels. However this comes with a few draw backs. 
