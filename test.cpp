@@ -62,6 +62,8 @@ int main(int argc, char **argv) {
 	s[len] = 0;
 	strcpy(s, str);
 	
+	m->set_brightness(10);
+	
 	while (1) {
 		if (flag) {
 			for (int i = 1; i < rows; i++)
