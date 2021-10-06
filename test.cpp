@@ -33,7 +33,7 @@ char* time_str(const struct tm *timeptr) {
 	static char result[33];
 	snprintf(result, 33, "  %3s %2d:%.2d %2s    %3s %2d, %4d",
 		wday_name[timeptr->tm_wday],
-		(timeptr->tm_hour % 12) ? timeptr->tm_hour : (timeptr->tm_hour % 12) + 12,
+		(timeptr->tm_hour % 12) ? timeptr->tm_hour % 12 : (timeptr->tm_hour % 12) + 12,
 		timeptr->tm_min,
 		hr[timeptr->tm_hour / 12],
 		mon_name[timeptr->tm_mon],
