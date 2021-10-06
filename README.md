@@ -128,3 +128,26 @@ Other applications also likely exist which may want this. Nice thing here is you
 
 ## Graphics
 There are several APIs for graphics processing in Java, QT, etc. Then there is OpenGL which is usually available. Granted this requires Linux and potentially higher end hardware on the server. However this may be easier/enable higher end processing function. This should also enable tighter integration functions with more resource consuming loads like 3D graphics, video, fancy web servers, etc. (Perhaps you want to use two NICs or VLAN to prevent the multicast.)
+
+## Comparison
+Trying to make a 16x128 RGB LED Matrix on PoE is possible using this approach. However other approaches are possible. Note these comparisons are only correct for this specific usage. There is a lot lurking below the covers here too.
+
+### Raspberry Pi
+The Raspberry Pi supports integrating a server into the box enabling lots of features. The Raspberry Pi saves around 13 to 23 dollars. The Raspberry Pi 2+ has improved stability but suffers higher power consumption. Matrix stability is a concern using the Raspberry Pi without special consideration compared to receiver card. Matrix quality is also a concern using the Raspberry Pi RGB Matrix library, however customizations may be possible to work around this. Quality issues result in reductions of color depth and refresh compared to that of receiver card. The security model for the Raspberry Pi is also a concern which increases risk for power and stability issues outside mitigation control. Note this does not really apply to the receiver card as the server is external.
+
+More than likely all of these issues could be worked around for the most part. However this requires a decent level of understanding of LED Matrixes, Raspberry Pi, Linux, the RGB LED Matrix library, etc. Should the system be deadlocked the display will noticably suffer issues. Granted this is not expected to occur very often if at all depending on usage.
+
+### Microcontroller
+A microcontroller could be used to integrate a server into the box enabling some features available to the Raspberry Pi. This solution is generally more expensive than the receiver card. Stability and quality are not likely an issue for a microcontroller. However multiple microcontrollers are likely required or a stronger microcontroller(s) are required. Power consumption is not expected to be a huge issue for microcontroller(s). The primary benefit to a microcontroller is its security model compared to the Raspberry Pi. Note this does not really apply to the receiver card as the server is external.
+
+### PWM/MM LED Panels
+It is possible to increase the number of pixels with different LED panels. However this comes with a few draw backs. 
+
+There is a limit to the number of pixels which can be stored on the receiver card or microcontroller. There is a limit to the number of pixels for a given quality and refresh which can be supported on a microcontroller or Raspberry Pi. There is a limit to the amount of IO connector bandwidth and connectors for receiver card, microcontroller and Raspberry Pi. 
+
+There is a limit to the amount of power which can supplied to the LED Panels. The easy way to increase pixels without changing power consumption is with higher multiplex panels. However this reduces the brightness of the panels. With some LED panels they use LED drivers which enable lowering the power consumption with software gain control rather than having to change the current limiting resistor manually.
+
+PWM/MM Panels support longer chains without affecting quality and refresh due to improved serial protocol. These require special support which is not currently available for most micrcontrollers and Raspberry Pi. Support is available for receiver card as long as there is enough RAM/IO.
+
+### PoE 802.3AF vs 802.3AT
+802.3AF enables universal PoE support up to 100 meters. However limits the amount of power to a total of 12.95 Watts, but not all of this power is able to be used by the LEDs. Only around 8.2 Watts of power is available. Note this requires special tricks to make this possible. You cannot use 5 Volts. However does enable around 10mA per RGB pixel, assuming 1:8 multiplexing.
