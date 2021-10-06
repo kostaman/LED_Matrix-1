@@ -152,6 +152,6 @@ PWM/MM Panels support longer chains without affecting quality and refresh due to
 ### PoE 802.3AF vs 802.3AT
 802.3AF enables universal PoE support up to 100 meters. However limits the amount of power to a total of 12.95 Watts, but not all of this power is able to be used by the LEDs. Only around 8.2 Watts of power is available. Note this requires special tricks to make this possible. You cannot use 5 Volts. However does enable around 10mA per RGB pixel, assuming 1:8 multiplexing.
 
-Note up to 2.72 Watts of the 12.95 is lost to internal conversion. Meaning an effeciency of around 79 percent is assumed. These leaves only 2 Watts for the control logic like the Receiver card. This can be difficult with the Raspberry Pi without special planning. However should not be a problem with some, if not all, receiver cards and microcontroller(s). 
+Note up to 2.72 Watts of the 12.95 is lost to internal conversion. Meaning an effeciency of around 79 percent is assumed. This leaves only 2 Watts for the control logic like the Receiver card. This can be difficult with the Raspberry Pi without special planning. However should not be a problem with some, if not all, receiver cards and microcontroller(s). 
 
 Note stealing additional power from LEDs is also possible which may result in a trivial amount of brightness reduction. However this is not recommended. Even less so is possibly limiting the number of RGB pixels on at a time to limit LED power consumption.
