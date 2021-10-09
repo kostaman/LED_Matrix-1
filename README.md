@@ -166,6 +166,6 @@ It is recommended to use VLAN to contain packet transmission. While not required
 https://www.amazon.com/TP-Link-Lifetime-Protection-Aggregation-TL-SG105PE/dp/B08D73YD5S
 
 ## Compared to Internal Pi/MCU
-You can save 13-35 dollars depending how much the receiver card costs (16-38) dollars. However this is only really useful for one offs. Installing a 16x128 display into multiple rooms driven from single server over switch is cheaper with this approach.
+You can save 13-35 dollars depending how much the receiver card costs (16-38) dollars. However this is only really useful for one offs. Installing a 16x128 display into multiple rooms driven from single server over switch is cheaper with this approach. Pi/MCU likely would require MM panels which are generally larger and more expensive. This could work however the visibly due to shape and brightness may be less.
 
 There could be security concerns with internal Pi/MCU depending on design.
