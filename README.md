@@ -170,6 +170,7 @@ Receiver cards are not known to support addressing outside of physical link. How
 Cost savings can be high here since PoE or standard switches are likely required anyhow. However multiple physical segements via multiple NIC cards is also possible. This may represent as safer and possibly low cost option in some cases.
 
 Example of small PoE Switch for a one to four displays is provided below. This product family has higher port configurations available for larger setups.
+
 https://www.amazon.com/TP-Link-Lifetime-Protection-Aggregation-TL-SG105PE/dp/B08D73YD5S
 
 ## Compared to Internal Pi/MCU
