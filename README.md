@@ -163,7 +163,7 @@ Note stealing additional power from LEDs is also possible which may result in a 
 ## VLAN / Switch
 It is recommended to use VLAN to contain packet transmission. While not required it may be desired for security or functional purposes. The reason for the recommendation is prevent flooding, which is possible since the L2 switch may never be able to associate the packet to a single port. This may sound like a flaw but it is potentially more stable. These are likely designed to work on dedicated L2 segements anyhow for stability concerns. VLANs are an alternative to physical segementation.
 
-If looking to restrict access to the display, L2 segement issolation can prevent unathorized access to display and network traffic. Note if using VLANs configuration of network and network devices can represent possible concerns for security. When in doubt use physical issolation.
+If looking to restrict access to the display, L2 segement issolation can prevent unathorized access to display and network traffic. Note if using VLANs, configuration of network and networking devices (such as smart switches) can represent possible concerns for security. When in doubt use physical issolation.
 
 Receiver cards are not known to support addressing outside of physical link. However it is possible to use virtual links to work around this. This allows multiple displays to be partitioned into groups or addressed individually. Port mirroring would enable duplication of messages to multiple displays/groups. This can reduce the complexity of software and network bandwidth significantly. 
 
