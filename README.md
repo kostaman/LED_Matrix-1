@@ -159,3 +159,13 @@ PWM/MM Panels support longer chains without affecting quality and refresh due to
 Note up to 2.72 Watts of the 12.95 is lost to internal conversion. Meaning an effeciency of around 79 percent is assumed. This leaves only 2 Watts for the control logic like the Receiver card. This can be difficult with the Raspberry Pi without special planning. However should not be a problem with some, if not all, receiver cards and microcontroller(s). 
 
 Note stealing additional power from LEDs is also possible which may result in a trivial amount of brightness reduction. However this is not recommended. Even less so is possibly limiting the number of RGB pixels on at a time to limit LED power consumption.
+
+## VLAN / Switch
+It is recommended to use VLAN to contain packet transmission. While not required it may be desired for security or functional purposes. Receiver cards are not known to support addressing outside of physical link. However it is possible to use virtual links to work around this. Port mirroring would enable duplication.
+
+https://www.amazon.com/TP-Link-Lifetime-Protection-Aggregation-TL-SG105PE/dp/B08D73YD5S
+
+## Compared to Internal Pi/MCU
+You can save 13-35 dollars depending how much the receiver card costs (16-38) dollars. However this is only really useful for one offs. Installing a 16x128 display into multiple rooms driven from single server over switch is cheaper with this approach.
+
+There could be security concerns with internal Pi/MCU depending on design.
