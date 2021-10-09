@@ -5,12 +5,14 @@
  *
  * Created on October 9, 2021
  *
+ * FOR USE WITH COLORLIGHT HARDWARE
+ *
  * This example maps the output of LEDVISION.
  *  LEDVISION does not support the required mapping, however pixel data is available.
  *   One virtual machine runs LEDVISION which outputs to a VNET which is connected to a
  *    Linux VM running the LED_Matrix daemon.
  *   Thus allowing usage of LEDVISION on the display via this application.
- *   Performance and stability of this are not fully known. However it looks to be okay.
+ *   Performance and stability of this are not fully known.
  */
 
 #include <linux/if_packet.h>
