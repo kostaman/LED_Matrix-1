@@ -31,7 +31,7 @@ char* time_str(const struct tm *timeptr) {
 	  	"AM", "PM"
 	};
 	static char result[33];
-	snprintf(result, 33, "  %3s %2d:%.2d %2s    %3s %2d, %4d",
+	snprintf(result, 33, "  %3s %2d:%.2d %2s    %3s %2d, %4d  ",
 		wday_name[timeptr->tm_wday],
 		(timeptr->tm_hour % 12) ? timeptr->tm_hour % 12 : (timeptr->tm_hour % 12) + 12,
 		timeptr->tm_min,
@@ -90,15 +90,7 @@ int main(int argc, char **argv) {
 			usleep(500 * 1000);
 			time_t t;
 			time(&t);
-			char *str = time_str(localtime(&t));
-			int len = strlen(str);
-			char *s;
-			if (len % 16)
-				len += 16 - len % 16;
-			s = (char *) malloc(len + 1);
-			memset(s, ' ', len);
-			s[len] = 0;
-			strcpy(s, str);
+			char *s = time_str(localtime(&t));
 			m->clear();
 			for (int x = 0; x < cols; x++) {
 				for (int y = 0; y < rows; y++) {
@@ -116,7 +108,7 @@ int main(int argc, char **argv) {
 		for (int x = 0; x < cols; x++)
 			for (int y = 0; y < rows; y++)
 				m->set_pixel(x, y, buffer[y][x]);
-		m->send_frame();
+		m->send_frame(2);
 	}
 
 	return 0;
