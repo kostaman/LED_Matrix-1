@@ -9,6 +9,7 @@
  *
  * This example maps the output of LEDVISION.
  *  LEDVISION does not support the required mapping, however pixel data is available.
+ *   (May also be a limitation of my understanding or receiver card firmware.)
  *   One virtual machine runs LEDVISION which outputs to a VNET which is connected to a
  *    Linux VM running the LED_Matrix daemon.
  *   Thus allowing usage of LEDVISION on the display via this application.
