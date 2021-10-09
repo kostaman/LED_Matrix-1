@@ -161,8 +161,15 @@ Note up to 2.72 Watts of the 12.95 is lost to internal conversion. Meaning an ef
 Note stealing additional power from LEDs is also possible which may result in a trivial amount of brightness reduction. However this is not recommended. Even less so is possibly limiting the number of RGB pixels on at a time to limit LED power consumption.
 
 ## VLAN / Switch
-It is recommended to use VLAN to contain packet transmission. While not required it may be desired for security or functional purposes. Receiver cards are not known to support addressing outside of physical link. However it is possible to use virtual links to work around this. Port mirroring would enable duplication.
+It is recommended to use VLAN to contain packet transmission. While not required it may be desired for security or functional purposes. The reason for the recommendation is prevent flooding, which is possible since the L2 switch may never be able to associate the packet to a single port. This may sound like a flaw but it is potentially more stable. These are likely designed to on dedicated L2 segements anyhow for stability concerns. VLANs are an alternative to physical segementation.
 
+If looking to restrict access to the display L2 segement issolation can prevent unathorized access to display and network traffic. Note if using VLANs configuration of network and network devices can represent possible concerns for security. When in doubt use physical issolation.
+
+Receiver cards are not known to support addressing outside of physical link. However it is possible to use virtual links to work around this. This allows multiple displays to be partitioned into groups or addressed individually. Port mirroring would enable duplication of messages to multiple displays/groups. This can reduce the complexity of software and network bandwidth significantly. 
+
+Cost savings can be high here since PoE or standard switches are likely required anyhow. However multiple physical segements via multiple NIC cards is also possible. This may represent as safer and possibly low cost option in some cases.
+
+Example of small PoE Switch for a one to four displays is provided below. This product family has higher port configurations available for larger setups.
 https://www.amazon.com/TP-Link-Lifetime-Protection-Aggregation-TL-SG105PE/dp/B08D73YD5S
 
 ## Compared to Internal Pi/MCU
