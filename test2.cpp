@@ -14,6 +14,9 @@
  *    Linux VM running the LED_Matrix daemon.
  *   Thus allowing usage of LEDVISION on the display via this application.
  *   Performance and stability of this are not fully known.
+ *    This is not expected to work well due to blocking on send_frame. Working around this
+ *     requires threads, double buffering, etc. I am not sure how worth this is.
+ *    However this may work somewhat for certain things. 
  */
 
 #include <linux/if_packet.h>
