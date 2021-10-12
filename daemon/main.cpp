@@ -46,15 +46,15 @@ int main(int argc, char **argv) {
 	rows = atoi(argv[2]);
 	cols = atoi(argv[3]);
 	
+	if (daemon(0, 0) < 0)
+		throw errno;
+	
 	try {
 		m = new Matrix(argv[1], rows, cols);
 	} 
 	catch (int e) {
 		usage(e, argv);
 	}
-	
-	if (daemon(0, 0) < 0)
-		throw errno;
 		
 	thread t(network, m, rows, cols);
 	
