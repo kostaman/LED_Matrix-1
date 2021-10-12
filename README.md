@@ -54,7 +54,7 @@ See [Configuration](https://github.com/daveythacher/LED_Matrix/blob/main/Configu
 Daemon:
 ```bash
 cd daemon
-g++ -O3 Matrix.cpp network.cpp main.cpp -o Matrix -lpthread
+g++ -O3 Matrix.cpp network.cpp main.cpp -o Matrix -lpthread -lrt
 ```
 Demo:
 ```bash
