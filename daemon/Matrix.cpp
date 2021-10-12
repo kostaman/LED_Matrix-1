@@ -25,7 +25,7 @@
 using LED_Matrix::Matrix;
 using LED_Matrix::Matrix_RGB_t;
 
-Matrix::Matrix(const char *iface, uint32_t r, uint32_t c) : rows(r), cols(c) {
+Matrix::Matrix(const char *iface, uint32_t r, uint32_t c, bool db) : rows(r), cols(c), doubleBuffer(db) {
 	int f;
 	uint32_t *ptr;
 	struct ifreq if_idx;
@@ -36,16 +36,18 @@ Matrix::Matrix(const char *iface, uint32_t r, uint32_t c) : rows(r), cols(c) {
 	brightness = 0xFF;
 	b_raw = 0xFF;
 	
-	attr.mq_flags = 0;
-	attr.mq_maxmsg = 5;
-	attr.mq_msgsize = sizeof(Queue_MSG);
-	attr.mq_curmsgs = 0;
-	if ((queue = mq_open(queue_name, O_RDWR | O_CREAT, 0666, &attr)) == -1)
-		throw -1;
-	
-	stop = false;
-	if (pthread_create(&thread, NULL, (void *(*)(void *)) &Matrix::send_frame_thread, this))
-		throw errno;
+	if (doubleBuffer) {
+		attr.mq_flags = 0;
+		attr.mq_maxmsg = 5;
+		attr.mq_msgsize = sizeof(Queue_MSG);
+		attr.mq_curmsgs = 0;
+		if ((queue = mq_open(queue_name, O_RDWR | O_CREAT, 0666, &attr)) == -1)
+			throw -1;
+		
+		stop = false;
+		if (pthread_create(&thread, NULL, (void *(*)(void *)) &Matrix::send_frame_thread, this))
+			throw errno;
+	}
 	
 	if ((f = open("/tmp/LED_Matrix.mem", O_CREAT | O_RDWR, 0666)) < 0)
 		if ((f = open("/tmp/LED_Matrix.mem", O_RDWR, 0666)) < 0)
@@ -82,10 +84,12 @@ Matrix::Matrix(const char *iface, uint32_t r, uint32_t c) : rows(r), cols(c) {
 
 Matrix::~Matrix() {
 	void *result;
-	stop = true;
-	pthread_join(thread, &result);
-	if (mq_close(queue) != -1)
-		mq_unlink(queue_name);
+	if (doubleBuffer) {
+		stop = true;
+		pthread_join(thread, &result);
+		if (mq_close(queue) != -1)
+			mq_unlink(queue_name);
+	}
 }
 
 void Matrix::set_pixel_raw(uint32_t x, uint32_t y, Matrix_RGB_t pixel) {
@@ -134,10 +138,16 @@ void Matrix::send_frame(uint16_t vlan_id) {
 }
 
 void Matrix::send_frame(bool vlan, uint16_t id) {
-	Matrix_RGB_t *buf = new Matrix_RGB_t[rows * cols];
-	Queue_MSG frame = {vlan, id, buf};
-	memcpy(buf, buffer, sizeof(Matrix_RGB_t) * rows * cols);
-	mq_send(queue, (char *) &frame, sizeof(Queue_MSG), 0);		// frame is memcpy into queue by mq_send
+	if (doubleBuffer) {
+		Matrix_RGB_t *buf = new Matrix_RGB_t[rows * cols];
+		Queue_MSG frame = {vlan, id, buf};
+		memcpy(buf, buffer, sizeof(Matrix_RGB_t) * rows * cols);
+		mq_send(queue, (char *) &frame, sizeof(Queue_MSG), 0);	// frame is memcpy into queue by mq_send
+	}
+	else {
+		Queue_MSG frame = {vlan, id, buffer};
+		send_frame_pkts(frame);
+	}
 }
 
 void Matrix::send_frame_pkts(Queue_MSG frame) {
