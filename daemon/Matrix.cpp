@@ -31,9 +31,21 @@ Matrix::Matrix(const char *iface, uint32_t r, uint32_t c) : rows(r), cols(c) {
 	struct ifreq if_idx;
 	struct sockaddr_ll sock_addr;
 	unsigned dhost[] = { 0x11, 0x22, 0x33, 0x44, 0x55, 0x66 };
+	struct mq_attr attr;
 	
 	brightness = 0xFF;
 	b_raw = 0xFF;
+	
+	attr.mq_flags = 0;
+	attr.mq_maxmsg = 5;
+	attr.mq_msgsize = sizeof(Queue_MSG);
+	attr.mq_curmsgs = 0;
+	if ((queue = mq_open(queue_name, O_RDWR | O_CREAT, 0666, &attr)) == -1)
+		throw -1;
+	
+	stop = false;
+	if (pthread_create(&thread, NULL, (void *(*)(void *)) &Matrix::send_frame_thread, this))
+		throw errno;
 	
 	if ((f = open("/tmp/LED_Matrix.mem", O_CREAT | O_RDWR, 0666)) < 0)
 		if ((f = open("/tmp/LED_Matrix.mem", O_RDWR, 0666)) < 0)
@@ -66,6 +78,14 @@ Matrix::Matrix(const char *iface, uint32_t r, uint32_t c) : rows(r), cols(c) {
 
 	if (bind(fd, (struct sockaddr *) &sock_addr, sizeof(sock_addr)) == -1) 
 		throw errno;
+}
+
+Matrix::~Matrix() {
+	void *result;
+	stop = true;
+	pthread_join(thread, &result);
+	if (mq_close(queue) != -1)
+		mq_unlink(queue_name);
 }
 
 void Matrix::set_pixel_raw(uint32_t x, uint32_t y, Matrix_RGB_t pixel) {
@@ -114,6 +134,13 @@ void Matrix::send_frame(uint16_t vlan_id) {
 }
 
 void Matrix::send_frame(bool vlan, uint16_t id) {
+	Matrix_RGB_t *buf = new Matrix_RGB_t[rows * cols];
+	Queue_MSG frame = {vlan, id, buf};
+	memcpy(buf, buffer, sizeof(Matrix_RGB_t) * rows * cols);
+	mq_send(queue, (char *) &frame, sizeof(Queue_MSG), 0);		// frame is memcpy into queue by mq_send
+}
+
+void Matrix::send_frame_pkts(Queue_MSG frame) {
 	uint32_t offset = 0;
 	struct mmsghdr msgs[rows + 2];
 	struct iovec iovecs[(2 * rows) + 2];
@@ -121,8 +148,8 @@ void Matrix::send_frame(bool vlan, uint16_t id) {
 	unsigned char *ptr;
 	int x;
 	
-	id &= 0xFFF;
-	if (vlan)
+	frame.vlan_id &= 0xFFF;
+	if (frame.vlan)
 		offset = 4;
 	
 	memset(msgs, 0, sizeof(msgs));
@@ -133,14 +160,14 @@ void Matrix::send_frame(bool vlan, uint16_t id) {
 	iovecs[0].iov_len = 112 + offset;
 	memset(ptr, 0, 112 + offset);
 	header = (struct ether_header *) ptr;
-	if (!vlan)
+	if (!frame.vlan)
 		header->ether_type = htons(0x0107);
 	else
 		header->ether_type = htons(0x8100);
 	set_address(header);
-	if (vlan) {
-		ptr[sizeof(struct ether_header) + 0] = (0xE << 4) | (id >> 8);
-		ptr[sizeof(struct ether_header) + 1] = id & 0xFF;
+	if (frame.vlan) {
+		ptr[sizeof(struct ether_header) + 0] = (0xE << 4) | (frame.vlan_id >> 8);
+		ptr[sizeof(struct ether_header) + 1] = frame.vlan_id & 0xFF;
 		ptr[sizeof(struct ether_header) + 2] = htons(0x0107) & 0xFF;
 		ptr[sizeof(struct ether_header) + 3] = htons(0x0107) >> 8;
 	}
@@ -158,15 +185,15 @@ void Matrix::send_frame(bool vlan, uint16_t id) {
 	iovecs[1].iov_len = 77 + offset;
 	memset(ptr, 0, 77 + offset);
 	header = (struct ether_header *) ptr;
-	if (!vlan)
+	if (!frame.vlan)
 		// Changes with Color Temperature setting (Not used), bell curve shift of R and/or B centered at 6500 (default)
 		header->ether_type = htons(0x0A00 + brightness);
 	else
 		header->ether_type = htons(0x8100);
 	set_address(header);
-	if (vlan) {
-		ptr[sizeof(struct ether_header) + 0] = (0xE << 4) | (id >> 8);
-		ptr[sizeof(struct ether_header) + 1] = id & 0xFF;
+	if (frame.vlan) {
+		ptr[sizeof(struct ether_header) + 0] = (0xE << 4) | (frame.vlan_id >> 8);
+		ptr[sizeof(struct ether_header) + 1] = frame.vlan_id & 0xFF;
 		// Changes with Color Temperature setting (Not used), bell curve shift of R and/or B centered at 6500 (default)
 		ptr[sizeof(struct ether_header) + 2] = htons(0x0A00 + brightness) & 0xFF;
 		ptr[sizeof(struct ether_header) + 3] = htons(0x0A00 + brightness) >> 8;
@@ -184,14 +211,14 @@ void Matrix::send_frame(bool vlan, uint16_t id) {
 		iovecs[x * 2 + 2].iov_len = sizeof(struct ether_header) + 7 + offset;
 		memset(ptr, 0, sizeof(struct ether_header) + 7 + offset);
 		header = (struct ether_header *) ptr;
-		if (!vlan)
+		if (!frame.vlan)
 			header->ether_type = htons(0x5500);
 		else
 			header->ether_type = htons(0x8100);
 		set_address(header);
-		if (vlan) {
-			ptr[sizeof(struct ether_header) + 0] = (0xE << 4) | (id >> 8);
-			ptr[sizeof(struct ether_header) + 1] = id & 0xFF;
+		if (frame.vlan) {
+			ptr[sizeof(struct ether_header) + 0] = (0xE << 4) | (frame.vlan_id >> 8);
+			ptr[sizeof(struct ether_header) + 1] = frame.vlan_id & 0xFF;
 			ptr[sizeof(struct ether_header) + 2] = htons(0x5500) & 0xFF;
 			ptr[sizeof(struct ether_header) + 3] = htons(0x5500) >> 8;
 		}
@@ -201,7 +228,7 @@ void Matrix::send_frame(bool vlan, uint16_t id) {
 		ptr[sizeof(struct ether_header) + 4 + offset] = cols & 0xFF;
 		ptr[sizeof(struct ether_header) + 5 + offset] = 0x08;	// Function unknown
 		ptr[sizeof(struct ether_header) + 6 + offset] = 0x88;	// Function unknown
-		iovecs[x * 2 + 3].iov_base = (buffer + (x * cols));
+		iovecs[x * 2 + 3].iov_base = (frame.buffer + (x * cols));
 		iovecs[x * 2 + 3].iov_len = cols * sizeof(Matrix_RGB_t);
 		msgs[x].msg_hdr.msg_iov = &iovecs[x * 2 + 2];
 		msgs[x].msg_hdr.msg_iovlen = 2;
@@ -209,4 +236,21 @@ void Matrix::send_frame(bool vlan, uint16_t id) {
 	
 	if (sendmmsg(fd, msgs, rows + 2, 0) != rows + 2)
 		throw errno;
+}
+
+void *Matrix::send_frame_thread(void *arg) {
+	struct timespec t;
+	Queue_MSG msg;
+	Matrix *m = (Matrix *) arg;
+	
+	while (!m->stop) {
+		clock_gettime(CLOCK_REALTIME, &t);
+		t.tv_sec += 1;
+		if (mq_timedreceive(m->queue, (char *) &msg, sizeof(Queue_MSG), NULL, &t) > 0) {
+			m->send_frame_pkts(msg);
+			delete msg.buffer;
+		}
+	}
+	
+	return 0;
 }
