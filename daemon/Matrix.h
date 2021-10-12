@@ -25,7 +25,7 @@ namespace LED_Matrix {
     
 	class Matrix {
 		public:
-			Matrix(const char *interface, uint32_t rows = 64, uint32_t cols = 32);
+			Matrix(const char *interface, uint32_t rows = 64, uint32_t cols = 32, bool doubleBuffer = false);
 			~Matrix();
 			
 			void send_frame();
@@ -53,6 +53,7 @@ namespace LED_Matrix {
 			pthread_t thread;
 			mqd_t queue;
 			bool stop;
+			bool doubleBuffer;
 			const char *queue_name = "/queue";
 			
 			void send_frame_pkts(Queue_MSG frame);
