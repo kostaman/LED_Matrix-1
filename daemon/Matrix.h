@@ -10,6 +10,8 @@
 #define	Matrix_H
 
 #include <stdint.h>
+#include <mqueue.h>
+#include <pthread.h>
 
 namespace LED_Matrix {
 	struct Matrix_RGB_t {
@@ -24,6 +26,7 @@ namespace LED_Matrix {
 	class Matrix {
 		public:
 			Matrix(const char *interface, uint32_t rows = 64, uint32_t cols = 32);
+			~Matrix();
 			
 			void send_frame();
 			void send_frame(uint16_t vlan_id);
@@ -41,7 +44,20 @@ namespace LED_Matrix {
 			Matrix_RGB_t *buffer;
 
 		private:
+			struct Queue_MSG {
+				bool vlan;
+				uint16_t vlan_id;
+				Matrix_RGB_t *buffer;
+			};
+		
+			pthread_t thread;
+			mqd_t queue;
+			bool stop;
+			const char *queue_name = "/queue";
+			
+			void send_frame_pkts(Queue_MSG frame);
 			void send_frame(bool vlan, uint16_t vlan_id);
+			static void *send_frame_thread(void *arg);
 	};
 }
 
