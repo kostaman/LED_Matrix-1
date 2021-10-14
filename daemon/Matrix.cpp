@@ -26,6 +26,8 @@
 using LED_Matrix::Matrix;
 using LED_Matrix::Matrix_RGB_t;
 
+uint32_t Matrix::queue_num = 0;
+
 Matrix::Matrix(const char *iface, uint32_t channel, uint32_t r, uint32_t c, bool db) : rows(r), cols(c), doubleBuffer(db) {
 	int f;
 	uint32_t *ptr;
@@ -43,7 +45,8 @@ Matrix::Matrix(const char *iface, uint32_t channel, uint32_t r, uint32_t c, bool
 		attr.mq_maxmsg = 5;
 		attr.mq_msgsize = sizeof(Queue_MSG);
 		attr.mq_curmsgs = 0;
-		if ((queue = mq_open(queue_name, O_RDWR | O_CREAT, 0666, &attr)) == -1)
+		snprintf(filename, 25, "%s-%d", queue_name, get_queue_num());
+		if ((queue = mq_open(filename, O_RDWR | O_CREAT, 0666, &attr)) == -1)
 			throw -1;
 		
 		stop = false;
@@ -113,8 +116,13 @@ void Matrix::clear() {
 
 void Matrix::set_brightness(uint8_t b) {
 	b %= 101;
+	
+	// TODO: add mutex(brightness)
+	
 	b_raw = round(b / 100.0 * 255.0);
 	brightness = round(pow(b / 100.0, 0.405) * 255.0);
+	
+	// TODO: free mutex(brightness)
 }
 
 static void set_address(struct ether_header *header) {
@@ -176,6 +184,9 @@ void Matrix::send_frame_pkts(Queue_MSG frame) {
 		ptr[sizeof(struct ether_header) + 2] = htons(0x0107) & 0xFF;
 		ptr[sizeof(struct ether_header) + 3] = htons(0x0107) >> 8;
 	}
+	
+	// TODO: Add mutex(brightness)
+	
 	ptr[sizeof(struct ether_header) + 21 + offset] = b_raw;		// Global brightness? (Not used)
 	ptr[sizeof(struct ether_header) + 22 + offset] = 0x05;		// Enables brightness settings? (Unstable if not set)
 	// Changes with Color Temperature setting (Not used), bell curve shift of R and/or B centered at 6500 (default)
@@ -209,6 +220,8 @@ void Matrix::send_frame_pkts(Queue_MSG frame) {
 	ptr[sizeof(struct ether_header) + 2 + offset] = 0xFF;		// Function unknown
 	msgs[rows + 1].msg_hdr.msg_iov = &iovecs[1];
 	msgs[rows + 1].msg_hdr.msg_iovlen = 1;
+	
+	// TODO: free mutex(brightness)
 	
 	for (x = 0; x < rows; x++) {
 		ptr = (unsigned char *) malloc(sizeof(struct ether_header) + 7 + offset);
@@ -258,5 +271,9 @@ void *Matrix::send_frame_thread(void *arg) {
 	}
 	
 	return 0;
+}
+
+uint32_t Matrix::get_queue_num() {
+	return ++queue_num;						// TODO: add mutex
 }
 

@@ -53,10 +53,12 @@ namespace LED_Matrix {
 			mqd_t queue;
 			bool stop;
 			bool doubleBuffer;
+			static uint32_t queue_num;
 			const char *queue_name = "/queue";
 			
 			void send_frame_pkts(Queue_MSG frame);
 			static void *send_frame_thread(void *arg);
+			uint32_t get_queue_num();
 	};
 }
 

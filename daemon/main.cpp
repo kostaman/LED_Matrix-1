@@ -58,7 +58,7 @@ int main(int argc, char **argv) {
 		exit(-1);
 	}
 	
-	/*ifstream cfg(argv[1]);
+	ifstream cfg(argv[1]);
 	
 	while(1)  {
 		channel_cfg c;
@@ -75,18 +75,7 @@ int main(int argc, char **argv) {
 			break;
 	}
 	
-	cfg.close();*/
-	
-	channel_cfg c;
-	c.iface = "ens33";
-	c.channel = 0;
-	c.port = 8080;
-	c.rows = 64;
-	c.cols = 32;
-	c.doubleBuffer = true;
-	c.vlan = false;
-	c.vlan_id = 13;
-	cfgs.push_back(c);
+	cfg.close();
 	
 	if (daemon(0, 0) < 0)
 		throw errno;
