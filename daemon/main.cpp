@@ -17,8 +17,14 @@
 using std::cerr;
 using std::endl;
 
+#include <fstream>
+using std::ifstream;
+
 #include <thread>
 using std::thread;
+
+#include <vector>
+using std::vector;
 
 #include <string>
 using std::string;
@@ -44,32 +50,40 @@ extern void network(Matrix *m, uint32_t rows, uint32_t cols, uint16_t port, bool
 void channel_thread(channel_cfg cfg);
 
 int main(int argc, char **argv) {
-	int num_threads = 1;
-	thread channels[num_threads];
-	channel_cfg cfgs[num_threads];
+	vector<channel_cfg> cfgs;
+	vector<thread> channels;
 	
 	if (argc != 2) {
-		cerr << "Usage: sudo " << argv[0] << "<config_file>" << endl;
+		cerr << "Usage: sudo " << argv[0] << " <config_file>" << endl;
 		exit(-1);
 	}
 	
-	// TODO: Process configuration file
-	cfgs[0].iface = "ens33";
-	cfgs[0].rows = 64;
-	cfgs[0].cols = 32;
-	cfgs[0].channel = 0;
-	cfgs[0].port = 8080;
-	cfgs[0].vlan = false;
-	cfgs[0].vlan_id = 13;
-	cfgs[0].doubleBuffer = false;
+	ifstream cfg(argv[1]);
+	
+	while(1)  {
+		channel_cfg c;
+		
+		cfg >> c.channel >> c.port;
+		cfg >> c.iface;
+		cfg >> c.rows >> c.cols;
+		cfg >> c.doubleBuffer;
+		cfg >> c.vlan >> c.vlan_id;
+		
+		if (!cfg.fail() && !cfg.eof())
+			cfgs.push_back(c);
+		else
+			break;
+	}
+	
+	cfg.close();
 	
 	if (daemon(0, 0) < 0)
 		throw errno;
 		
-	for (int i = 0; i < num_threads; i++)
-		channels[i] = thread(channel_thread, cfgs[i]);
+	for (int i = 0; i < cfgs.size(); i++)
+		channels.push_back(thread(channel_thread, cfgs[i]));
 	
-	for (int i = 0; i < num_threads; i++)
+	for (int i = 0; i < channels.size(); i++)
 		channels[i].join();
 	
 	return 0;
@@ -83,7 +97,7 @@ void channel_thread(channel_cfg cfg) {
 		
 	thread t(network, m, cfg.rows, cfg.cols, cfg.port, cfg.vlan, cfg.vlan_id);
 	
-	snprintf(filename, 25, "/tmp/LED_Matrix-%d.mem", cfg.channel);
+	snprintf(filename, 25, "/tmp/LED_Matrix-%c.mem", cfg.channel);
 	if ((f = open(filename, O_RDWR)) < 0)
 		throw errno;
 		

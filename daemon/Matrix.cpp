@@ -51,7 +51,7 @@ Matrix::Matrix(const char *iface, uint8_t channel, uint32_t r, uint32_t c, bool 
 			throw errno;
 	}
 	
- 	snprintf(filename, 25, "/tmp/LED_Matrix-%d.mem", channel);
+ 	snprintf(filename, 25, "/tmp/LED_Matrix-%c.mem", channel);
 	if ((f = open(filename, O_CREAT | O_RDWR, 0666)) < 0)
 		if ((f = open(filename, O_RDWR, 0666)) < 0)
 			throw errno;

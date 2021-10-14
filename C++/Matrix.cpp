@@ -23,7 +23,7 @@
 	char filename[25];
  	
  	isNet = false;
- 	snprintf(filename, 25, "/tmp/LED_Matrix-%d.mem", channel);
+ 	snprintf(filename, 25, "/tmp/LED_Matrix-%c.mem", channel);
  	if ((fd = open(filename, O_RDWR)) < 0)
 		throw errno;
 	
