@@ -26,7 +26,7 @@
 using LED_Matrix::Matrix;
 using LED_Matrix::Matrix_RGB_t;
 
-Matrix::Matrix(const char *iface, uint8_t channel, uint32_t r, uint32_t c, bool db) : rows(r), cols(c), doubleBuffer(db) {
+Matrix::Matrix(const char *iface, uint32_t channel, uint32_t r, uint32_t c, bool db) : rows(r), cols(c), doubleBuffer(db) {
 	int f;
 	uint32_t *ptr;
 	char filename[25];
@@ -51,7 +51,7 @@ Matrix::Matrix(const char *iface, uint8_t channel, uint32_t r, uint32_t c, bool 
 			throw errno;
 	}
 	
- 	snprintf(filename, 25, "/tmp/LED_Matrix-%c.mem", channel);
+ 	snprintf(filename, 25, "/tmp/LED_Matrix-%d.mem", channel);
 	if ((f = open(filename, O_CREAT | O_RDWR, 0666)) < 0)
 		if ((f = open(filename, O_RDWR, 0666)) < 0)
 			throw errno;

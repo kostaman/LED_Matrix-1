@@ -25,7 +25,7 @@ namespace LED_Matrix {
     
 	class Matrix {
 		public:
-			Matrix(const char *interface, uint8_t channel, uint32_t rows = 64, uint32_t cols = 32, bool doubleBuffer = false);
+			Matrix(const char *interface, uint32_t channel = 0, uint32_t rows = 64, uint32_t cols = 32, bool doubleBuffer = false);
 			~Matrix();
 			
 			void send_frame(bool vlan, uint16_t vlan_id);

@@ -15,15 +15,15 @@
  #include <arpa/inet.h>
  #include <fcntl.h>
  #include <string.h>
-#include <stdio.h>
+ #include <stdio.h>
  #include "Matrix.h"
  
- Matrix::Matrix(uint8_t channel, uint32_t r, uint32_t c) : virt_rows(r), virt_cols(c) {
+ Matrix::Matrix(uint32_t channel, uint32_t r, uint32_t c) : virt_rows(r), virt_cols(c) {
  	struct stat st;
 	char filename[25];
  	
  	isNet = false;
- 	snprintf(filename, 25, "/tmp/LED_Matrix-%c.mem", channel);
+ 	snprintf(filename, 25, "/tmp/LED_Matrix-%d.mem", channel);
  	if ((fd = open(filename, O_RDWR)) < 0)
 		throw errno;
 	

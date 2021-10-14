@@ -39,7 +39,7 @@ struct channel_cfg {
 	string iface;
 	uint32_t rows;
 	uint32_t cols;
-	uint8_t channel;
+	uint32_t channel;
 	uint16_t port;
 	bool vlan;
 	uint8_t vlan_id;
@@ -97,7 +97,7 @@ void channel_thread(channel_cfg cfg) {
 		
 	thread t(network, m, cfg.rows, cfg.cols, cfg.port, cfg.vlan, cfg.vlan_id);
 	
-	snprintf(filename, 25, "/tmp/LED_Matrix-%c.mem", cfg.channel);
+	snprintf(filename, 25, "/tmp/LED_Matrix-%d.mem", cfg.channel);
 	if ((f = open(filename, O_RDWR)) < 0)
 		throw errno;
 		
