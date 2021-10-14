@@ -26,7 +26,7 @@ struct Matrix_RGB_t {
 
 class Matrix {
 	public:
-		Matrix(uint8_t channel, uint32_t r = 16, uint32_t c = 128);
+		Matrix(uint8_t channel = 0, uint32_t r = 16, uint32_t c = 128);
 		Matrix(char *address, uint16_t p, uint32_t r = 16, uint32_t c = 128);
 		~Matrix();
 			
