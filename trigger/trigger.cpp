@@ -16,7 +16,7 @@ int main(int argc, char **argv) {
 	int f;
 	volatile uint8_t *ptr;
 	
-	if ((f = open("/tmp/LED_Matrix.mem", O_RDWR)) < 0)
+	if ((f = open("/tmp/LED_Matrix-0.mem", O_RDWR)) < 0)
 		throw errno;
 		
 	ptr = (volatile uint8_t *) mmap(NULL, 4, PROT_READ | PROT_WRITE, MAP_SHARED, f, 0);
@@ -30,8 +30,8 @@ int main(int argc, char **argv) {
 	while(*ptr);
 	
 	// Trigger send_frame with VLAN 13
-	*(ptr + 2) = 13;
-	*ptr = 2;
+	//*(ptr + 2) = 13;
+	//*ptr = 2;
 	
 	return 0;
 }

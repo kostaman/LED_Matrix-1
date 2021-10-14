@@ -25,11 +25,10 @@ namespace LED_Matrix {
     
 	class Matrix {
 		public:
-			Matrix(const char *interface, uint32_t rows = 64, uint32_t cols = 32, bool doubleBuffer = false);
+			Matrix(const char *interface, uint8_t channel, uint32_t rows = 64, uint32_t cols = 32, bool doubleBuffer = false);
 			~Matrix();
 			
-			void send_frame();
-			void send_frame(uint16_t vlan_id);
+			void send_frame(bool vlan, uint16_t vlan_id);
 			void set_pixel_raw(uint32_t x, uint32_t y, Matrix_RGB_t pixel);
 			void fill(Matrix_RGB_t pixel);
 			void clear();
@@ -57,7 +56,6 @@ namespace LED_Matrix {
 			const char *queue_name = "/queue";
 			
 			void send_frame_pkts(Queue_MSG frame);
-			void send_frame(bool vlan, uint16_t vlan_id);
 			static void *send_frame_thread(void *arg);
 	};
 }

@@ -25,40 +25,62 @@ using LED_Matrix::Matrix_RGB_t;
 
 const int FPS = 60;
 
-extern void network(Matrix *m, uint32_t rows, uint32_t cols);
-
-void usage(int e, char **argv) {
-	if (e != 0)
-		cerr << "Error: " << strerror(e) << endl << endl;
-	cerr << "Usage: sudo " << argv[0] << " \"interface\" <rows> <cols>" << endl;
-	exit(-1);
+struct channel_cfg {
+	string iface;
+	uint32_t rows;
+	uint32_t cols;
+	uint8_t channel;
+	uint16_t port;
+	bool vlan;
+	uint8_t vlan_id;
+	bool doubleBuffer;
 }
 
+extern void network(Matrix *m, uint32_t rows, uint32_t cols, uint16_t port);
+void channel_thread(channel_cfg cfg);
+
 int main(int argc, char **argv) {
-	int f;
-	uint16_t rows, cols;
-	volatile uint8_t *ptr;
-	Matrix *m;
+	int num_threads = 1;
+	thread channels[num_threads];
+	channel_cfg cfgs[num_threads];
 	
-	if (argc != 4)
-		usage(0, argv);
+	if (argc != 2) {
+		cerr << "Usage: sudo " << argv[0] << "<config_file>" << endl;
+		exit(-1);
+	}
 	
-	rows = atoi(argv[2]);
-	cols = atoi(argv[3]);
+	// TODO: Process configuration file
+	cfgs[0].iface = "ens33";
+	cfgs[0].rows = 64;
+	cfgs[0].cols = 32;
+	cfgs[0].channel = 0;
+	cfgs[0].port = 8080;
+	cfgs[0].vlan = false;
+	cfgs[0].vlan_id = 13;
+	cfgs[0].doubleBuffer = false;
 	
 	if (daemon(0, 0) < 0)
 		throw errno;
-	
-	try {
-		m = new Matrix(argv[1], rows, cols);
-	} 
-	catch (int e) {
-		usage(e, argv);
-	}
 		
-	thread t(network, m, rows, cols);
+	for (int i = 0; i < num_threads; i++)
+		channels[i] = thread(channel_thread, cfgs[i]);
 	
-	if ((f = open("/tmp/LED_Matrix.mem", O_RDWR)) < 0)
+	for (int i = 0; i < num_threads; i++)
+		channels[i].join();
+	
+	return 0;
+}
+
+void channel_thread(channel_cfg cfg) {
+	int f;
+	char filename[25];
+	volatile uint8_t *ptr;
+	Matrix *m = new Matrix(cfg.iface, cfg.channel, cfg.rows, cfg.cols, cfg.doubleBuffer);
+		
+	thread t(network, m, cfg.rows, cfg.cols, cfg.port);
+	
+	snprintf(filename, 25, "/tmp/LED_Matrix-%d.mem", cfg.channel);
+	if ((f = open(filename, O_RDWR)) < 0)
 		throw errno;
 		
 	ptr = (volatile uint8_t *) mmap(NULL, 4, PROT_READ | PROT_WRITE, MAP_SHARED, f, 0);
@@ -71,21 +93,21 @@ int main(int argc, char **argv) {
 				usleep(1000000 / FPS);
 				break;
 			case 1:
-				m->send_frame();
+				m->send_frame(cfg.vlan, cfg.vlan_id);
 				*ptr = 0;
 				break;
-			case 2:
-				m->send_frame((uint16_t) (*(ptr + 1) << 8 | *(ptr + 2)));
+			case 2: // Allows bypass of config - not used
+				m->send_frame(*(ptr + 3) != 0, (uint16_t) (*(ptr + 1) << 8 | *(ptr + 2)));
 				*ptr = 0;
 				break;
 			case 3:
-				*(ptr + 2) = rows >> 8;
-				*(ptr + 3) = rows & 0xFF;
+				*(ptr + 2) = cfg.rows >> 8;
+				*(ptr + 3) = cfg.rows & 0xFF;
 				*ptr = 0;
 				break;
 			case 4:
-				*(ptr + 2) = cols >> 8;
-				*(ptr + 3) = cols & 0xFF;
+				*(ptr + 2) = cfg.cols >> 8;
+				*(ptr + 3) = cfg.cols & 0xFF;
 				*ptr = 0;
 				break;
 			case 5:
@@ -101,6 +123,5 @@ int main(int argc, char **argv) {
 				break;
 		}
 	}
-	
-	return 0;
 }
+

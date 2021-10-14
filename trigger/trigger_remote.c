@@ -69,13 +69,13 @@ int main(int argc, char **argv) {
 	transfer(sockfd, 1, &p, sizeof(p));
     
     	// Trigger send_frame with VLAN 13
-    	p.command = 0;
+    	/*p.command = 0;
     	p.marker = 0x09202021;
     	p.size = 2;
     	memset(data, 0, 2);
     	data[0] = 13;
 	transfer(sockfd, 1, &p, sizeof(p));
-	transfer(sockfd, 1, data, p.size);
+	transfer(sockfd, 1, data, p.size);*/
 	
 	// Get the number of Rows
     	p.command = 2;

@@ -15,7 +15,7 @@ int main(int argc, char **argv) {
 		Matrix_RGB_t p(255, 255, 255);
 		m->set_pixel(0, 0, p);
 		m->send_frame();
-		m->send_frame(13);
+		//m->send_frame(13);
 		m->fill(p);
 		m->send_frame();
 	}
@@ -25,7 +25,7 @@ int main(int argc, char **argv) {
 		Matrix_RGB_t p(255, 255, 255);
 		m->set_pixel(0, 0, p);
 		m->send_frame();
-		m->send_frame(13);
+		//m->send_frame(13);
 		m->fill(p);
 		m->send_frame();
 	}

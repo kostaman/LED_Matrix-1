@@ -12,7 +12,7 @@ import java.nio.*;
 import java.nio.channels.FileChannel;
 
 class Matrix {
-	Matrix(int r = 16, int c = 128) {
+	Matrix(int r = 16, int c = 128) { // TODO: Add channel number
 		map = new RandomAccessFile("/tmp/LED_Matrix.mem", "rw").getChannel().map(FileChannel.MapMode.READ_WRITE, 0, new File("/tmp/LED_Matrix.mem").length())
 		map.put(0, (Byte) 3)
 		while (map.get(0));
@@ -25,12 +25,13 @@ class Matrix {
 		virt_cols = c
 	}
 		
-	Matrix(String address, int r = 16, int c = 128) {
+	Matrix(String address, int p, int r = 16, int c = 128) {
 		addr = InetAddress.getByName(address)
+		port = p
 		isNet = true
 		virt_rows = r
 		virt_cols = c
-		def s = new Socket(addr, 8080)
+		def s = new Socket(addr, port)
 		s.withStreams { istream, ostream ->
 			def data = [0x21, 0x20, 0x20, 0x09, 2, 0, 0, 0 ] as byte[]
 			ostream.write(data, 0, data.size())
@@ -60,7 +61,7 @@ class Matrix {
 			while(map.get(0));
 		}
 		else {
-			def s = new Socket(addr, 8080)
+			def s = new Socket(addr, port)
 			s.withStreams { istream, ostream ->
 				def data = [0x21, 0x20, 0x20, 0x09, 1, 0, 0, 0 ] as byte[]
 				ostream.write(data, 0, data.size())
@@ -70,15 +71,16 @@ class Matrix {
 		}
 	}
 		
-	def send_frame(int vlan_id) {
+	/*def send_frame(int vlan_id) {
 		if (!isNet) {
 			map.put(2, (byte) vlan_id)
 			map.put(1, (byte) (vlan_id >> 8))
+			map.put(3, (byte) 1)
 			map.put(0, (byte) 2)
 			while(map.get(0));
 		}
 		else {
-			def s = new Socket(addr, 8080)
+			def s = new Socket(addr, port)
 			s.withStreams { istream, ostream ->
 				def data = [0x21, 0x20, 0x20, 0x09, 0, 2, 0, 0, vlan_id, vlan_id >> 8] as byte[]
 				ostream.write(data, 0, data.size())
@@ -86,7 +88,7 @@ class Matrix {
 			}
 			s.close()
 		}
-	}
+	}*/
 	
 	def set_pixel(int x, int y, Matrix_RGB_t pixel) {
 		def c = map_pixel(x, y)
@@ -119,7 +121,7 @@ class Matrix {
 			}
 		}
 		else {
-			def s = new Socket(addr, 8080)
+			def s = new Socket(addr, port)
 			s.withStreams { istream, ostream ->
 				def data = [0x21, 0x20, 0x20, 0x09, 5, 3, 0, 0, pixel.red, pixel.green, pixel.blue] as byte[]
 				ostream.write(data, 0, data.size())
@@ -140,7 +142,7 @@ class Matrix {
 			while(map.get(0));
 		}
 		else {
-			def s = new Socket(addr, 8080)
+			def s = new Socket(addr, port)
 			s.withStreams { istream, ostream ->
 				def data = [0x21, 0x20, 0x20, 0x09, 6, 1, 0, 0, brightness] as byte[]
 				ostream.write(data, 0, data.size())
@@ -177,7 +179,7 @@ class Matrix {
 		else {
 			def v = y * cols + x as int
 			v %= rows * cols
-			def s = new Socket(addr, 8080)
+			def s = new Socket(addr, port)
 			s.withStreams { istream, ostream ->
 				def data = [0x21, 0x20, 0x20, 0x09, 3, 7, 0, 0, v, v >> 8, v >> 16, v >> 24, pixel.red, pixel.green, pixel.blue] as byte[]
 				ostream.write(data, 0, data.size())
@@ -200,7 +202,7 @@ class Matrix {
 			}
 		}
 		else {
-			def s = new Socket(addr, 8080)
+			def s = new Socket(addr, port)
 			// TODO: Fix bug pixel.size() larger than 83
 			if (pixels.size() > 83)
 				throw new Exception("Currently cannot pass more than 83 pixels at a time to set_pixel_raw over TCP/network")
@@ -222,6 +224,7 @@ class Matrix {
 	
 	protected MappedByteBuffer map
 	protected InetAddress addr
+	protected int port
 	protected int rows
 	protected int cols
 	protected int virt_rows

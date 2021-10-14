@@ -130,7 +130,7 @@ exit:
 	close(client);
 }
 
-void network(Matrix *m, uint32_t rows, uint32_t cols) {
+void network(Matrix *m, uint32_t rows, uint32_t cols, uint16_t port) {
 	int server, handle;
 	socklen_t len;
 	struct sockaddr_in sock, client;
@@ -142,7 +142,7 @@ void network(Matrix *m, uint32_t rows, uint32_t cols) {
 	memset(&sock, 0, sizeof(sock));
 	sock.sin_family = AF_INET;
 	sock.sin_addr.s_addr = htonl(INADDR_ANY);
-	sock.sin_port = htons(8080);
+	sock.sin_port = htons(port);
 	
 	if (bind(server, (struct sockaddr *) &sock, sizeof(sock)) < 0) {
 		close(server);

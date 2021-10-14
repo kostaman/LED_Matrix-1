@@ -108,8 +108,9 @@ int main(int argc, char **argv) {
 		for (int x = 0; x < cols; x++)
 			for (int y = 0; y < rows; y++)
 				m->set_pixel(x, y, buffer[y][x]);
-		m->send_frame(2);
+		m->send_frame();
 	}
 
 	return 0;
 }
+

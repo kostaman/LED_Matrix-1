@@ -17,11 +17,13 @@
  #include <string.h>
  #include "Matrix.h"
  
- Matrix::Matrix(uint32_t r, uint32_t c) : virt_rows(r), virt_cols(c) {
+ Matrix::Matrix(uint8_t channel, uint32_t r, uint32_t c) : virt_rows(r), virt_cols(c) {
  	struct stat st;
+	char filename[25];
  	
  	isNet = false;
- 	if ((fd = open("/tmp/LED_Matrix.mem", O_RDWR)) < 0)
+ 	snprintf(filename, 25, "/tmp/LED_Matrix-%d.mem", channel);
+ 	if ((fd = open(filename, O_RDWR)) < 0)
 		throw errno;
 	
 	fstat(fd, &st);
@@ -41,7 +43,7 @@
 		throw rows * cols; 
  }
  
- Matrix::Matrix(char *addr, uint32_t r, uint32_t c) : virt_rows(r), virt_cols(c) {
+ Matrix::Matrix(char *addr, uint16_t p, uint32_t r, uint32_t c) : port(p), virt_rows(r), virt_cols(c) {
  	uint32_t data[2];
  	packet p;
  	p.command = 2;
@@ -97,12 +99,13 @@
  	}
  }
  
- void Matrix::send_frame(uint16_t vlan_id) {
+ /*void Matrix::send_frame(uint16_t vlan_id) {
  	packet p;
  	
  	if (!isNet) {
  		*(ptr + 1) = vlan_id >> 8;
  		*(ptr + 2) = vlan_id;
+ 		*(ptr + 3) = 1;
  		*ptr = 2;
  		while(*ptr);
  	}
@@ -116,7 +119,7 @@
  		close(fd);
  	}
  
- }
+ }*/
  
 void Matrix::set_pixel(uint32_t x, uint32_t y, Matrix_RGB_t pixel) {
 	map_pixel(&x, &y);
@@ -247,7 +250,7 @@ void Matrix::open_socket() {
 
 	memset(&serv_addr, '0', sizeof(serv_addr)); 
 	serv_addr.sin_family = AF_INET;
-	serv_addr.sin_port = htons(8080); 
+	serv_addr.sin_port = htons(port); 
 
 	if (inet_pton(AF_INET, address, &serv_addr.sin_addr) <= 0)
 		throw errno;

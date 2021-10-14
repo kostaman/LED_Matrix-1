@@ -73,7 +73,7 @@ int main(int argc, char *argv[]) {
 				}
 				break;
 			case 0x0107:
-				m->send_frame(2);
+				m->send_frame();
 				break;
 			default:
 				break;

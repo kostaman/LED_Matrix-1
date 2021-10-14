@@ -10,7 +10,7 @@
  
 import mmap
 
-f = open("/tmp/LED_Matrix.mem", "r+b")
+f = open("/tmp/LED_Matrix-0.mem", "r+b")
 mm = mmap.mmap(f.fileno(), length=0, access=mmap.ACCESS_WRITE)
 
 # Set pixel
@@ -28,7 +28,7 @@ while True:
 		break
 
 # Trigger send_frame with VLAN 13
-mm.seek(2)
-mm.write_byte(13)
-mm.seek(0)
-mm.write_byte(2)	
+#mm.seek(2)
+#mm.write_byte(13)
+#mm.seek(0)
+#mm.write_byte(2)	

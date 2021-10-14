@@ -25,9 +25,10 @@
 using LED_Matrix::Matrix;
 using LED_Matrix::Matrix_RGB_t;
 
-Matrix::Matrix(const char *iface, uint32_t r, uint32_t c, bool db) : rows(r), cols(c), doubleBuffer(db) {
+Matrix::Matrix(const char *iface, uint8_t channel, uint32_t r, uint32_t c, bool db) : rows(r), cols(c), doubleBuffer(db) {
 	int f;
 	uint32_t *ptr;
+	char filename[25];
 	struct ifreq if_idx;
 	struct sockaddr_ll sock_addr;
 	unsigned dhost[] = { 0x11, 0x22, 0x33, 0x44, 0x55, 0x66 };
@@ -49,11 +50,12 @@ Matrix::Matrix(const char *iface, uint32_t r, uint32_t c, bool db) : rows(r), co
 			throw errno;
 	}
 	
-	if ((f = open("/tmp/LED_Matrix.mem", O_CREAT | O_RDWR, 0666)) < 0)
-		if ((f = open("/tmp/LED_Matrix.mem", O_RDWR, 0666)) < 0)
+ 	snprintf(filename, 25, "/tmp/LED_Matrix-%d.mem", channel);
+	if ((f = open(filename, O_CREAT | O_RDWR, 0666)) < 0)
+		if ((f = open(filename, O_RDWR, 0666)) < 0)
 			throw errno;
 	
-	if (chmod("/tmp/LED_Matrix.mem", 0666) < 0)
+	if (chmod(filename, 0666) < 0)
 		throw errno;
 		
 	if (ftruncate(f, 4 + (cols * rows * sizeof(Matrix_RGB_t))) < 0)
@@ -127,14 +129,6 @@ static void set_address(struct ether_header *header) {
 	header->ether_dhost[3] = 0x44;
 	header->ether_dhost[4] = 0x55;
 	header->ether_dhost[5] = 0x66;
-}
-
-void Matrix::send_frame() {
-	send_frame(false, 0);
-}
-
-void Matrix::send_frame(uint16_t vlan_id) {
-	send_frame(true, vlan_id);
 }
 
 void Matrix::send_frame(bool vlan, uint16_t id) {
@@ -264,3 +258,4 @@ void *Matrix::send_frame_thread(void *arg) {
 	
 	return 0;
 }
+

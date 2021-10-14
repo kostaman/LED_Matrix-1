@@ -26,14 +26,14 @@ struct Matrix_RGB_t {
 
 class Matrix {
 	public:
-		Matrix(uint32_t r = 16, uint32_t c = 128);
-		Matrix(char *address, uint32_t r = 16, uint32_t c = 128);
+		Matrix(uint8_t channel, uint32_t r = 16, uint32_t c = 128);
+		Matrix(char *address, uint16_t p, uint32_t r = 16, uint32_t c = 128);
 		~Matrix();
 			
 		uint32_t get_rows();
 		uint32_t get_columns();	
 		void send_frame();
-		void send_frame(uint16_t vlan_id);
+		//void send_frame(uint16_t vlan_id);
 		void set_pixel(uint32_t x, uint32_t y, Matrix_RGB_t pixel);
 		void set_pixel(uint32_t x, uint32_t y, Matrix_RGB_t *pixels, uint8_t len);
 		void fill(Matrix_RGB_t pixel);
@@ -47,6 +47,7 @@ class Matrix {
 	
 		int fd;
 		char *address;
+		uint16_t port;
 		volatile uint8_t *ptr;
 		uint32_t rows;
 		uint32_t cols;
