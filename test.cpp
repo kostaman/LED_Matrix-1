@@ -43,7 +43,7 @@ char* time_str(const struct tm *timeptr) {
 }
 
 int main(int argc, char **argv) {
-	Matrix *m = new Matrix();
+	Matrix *m = new Matrix(0);
 	const int rows = m->get_rows();
 	const int cols = m->get_columns();
 	Matrix_RGB_t buffer[rows][cols];

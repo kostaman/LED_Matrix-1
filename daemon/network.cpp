@@ -45,7 +45,7 @@ int transfer(int client, bool out, void *ptr, uint32_t len) {
 	return result;
 }
 
-void func(Matrix *m, int client, uint32_t rows, uint32_t cols) {
+void func(Matrix *m, int client, uint32_t rows, uint32_t cols, bool vlan, uint16_t vlan_id) {
 	packet p;
 	uint64_t val;
 	uint16_t id;
@@ -64,13 +64,13 @@ void func(Matrix *m, int client, uint32_t rows, uint32_t cols) {
 				if (p.size == sizeof(id)) {
 					if (transfer(client, false, &id, sizeof(id))) 
 						goto exit;
-					m->send_frame(id);
+					m->send_frame(true, id); 	// TODO: Fix this not be hard coded
 				}
 				else goto exit;
 				break;
 			case 1: // send_frame
 				if (!p.size) 
-					m->send_frame();
+					m->send_frame(vlan, vlan_id);
 				else goto exit;
 				break;
 			case 2: // get rows and cols
@@ -130,7 +130,7 @@ exit:
 	close(client);
 }
 
-void network(Matrix *m, uint32_t rows, uint32_t cols, uint16_t port) {
+void network(Matrix *m, uint32_t rows, uint32_t cols, uint16_t port, bool vlan, uint16_t id) {
 	int server, handle;
 	socklen_t len;
 	struct sockaddr_in sock, client;
@@ -161,7 +161,7 @@ void network(Matrix *m, uint32_t rows, uint32_t cols, uint16_t port) {
 			return;
 		}
 		
-		//new thread(func, m, handle, rows, cols);
-		func(m, handle, rows, cols);
+		//new thread(func, m, handle, rows, cols, vlan, id);
+		func(m, handle, rows, cols, vlan, id);
 	}
 }

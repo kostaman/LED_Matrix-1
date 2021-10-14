@@ -11,7 +11,7 @@
 int main(int argc, char **argv) {
 
 	{
-		Matrix *m = new Matrix();
+		Matrix *m = new Matrix(0);
 		Matrix_RGB_t p(255, 255, 255);
 		m->set_pixel(0, 0, p);
 		m->send_frame();

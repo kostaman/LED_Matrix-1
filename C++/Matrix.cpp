@@ -15,6 +15,7 @@
  #include <arpa/inet.h>
  #include <fcntl.h>
  #include <string.h>
+#include <stdio.h>
  #include "Matrix.h"
  
  Matrix::Matrix(uint8_t channel, uint32_t r, uint32_t c) : virt_rows(r), virt_cols(c) {
@@ -43,7 +44,7 @@
 		throw rows * cols; 
  }
  
- Matrix::Matrix(char *addr, uint16_t p, uint32_t r, uint32_t c) : port(p), virt_rows(r), virt_cols(c) {
+ Matrix::Matrix(char *addr, uint16_t pn, uint32_t r, uint32_t c) : port(pn), virt_rows(r), virt_cols(c) {
  	uint32_t data[2];
  	packet p;
  	p.command = 2;

@@ -19,6 +19,7 @@
 #include <errno.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <stdio.h>
 
 #include <cmath>
 #include "Matrix.h"

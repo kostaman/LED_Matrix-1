@@ -36,7 +36,7 @@ int main(int argc, char *argv[]) {
 	struct sockaddr_ll sock_addr = {0};
 	struct packet_mreq mreq = {0};
 	uint8_t buf[1536];
-	Matrix *m = new Matrix();
+	Matrix *m = new Matrix(0);
 	struct ether_header *eh = (struct ether_header *) buf;
 	
 	if ((fd = socket(AF_PACKET, SOCK_RAW, htons(ETH_P_ALL))) == -1)

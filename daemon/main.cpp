@@ -11,6 +11,7 @@
 #include <fcntl.h>
 #include <errno.h>
 #include <string.h>
+#include <stdio.h>
 
 #include <iostream>
 using std::cerr;
@@ -18,6 +19,9 @@ using std::endl;
 
 #include <thread>
 using std::thread;
+
+#include <string>
+using std::string;
 
 #include "Matrix.h"
 using LED_Matrix::Matrix;
@@ -34,9 +38,9 @@ struct channel_cfg {
 	bool vlan;
 	uint8_t vlan_id;
 	bool doubleBuffer;
-}
+};
 
-extern void network(Matrix *m, uint32_t rows, uint32_t cols, uint16_t port);
+extern void network(Matrix *m, uint32_t rows, uint32_t cols, uint16_t port, bool vlan, uint16_t id);
 void channel_thread(channel_cfg cfg);
 
 int main(int argc, char **argv) {
@@ -75,9 +79,9 @@ void channel_thread(channel_cfg cfg) {
 	int f;
 	char filename[25];
 	volatile uint8_t *ptr;
-	Matrix *m = new Matrix(cfg.iface, cfg.channel, cfg.rows, cfg.cols, cfg.doubleBuffer);
+	Matrix *m = new Matrix(cfg.iface.c_str(), cfg.channel, cfg.rows, cfg.cols, cfg.doubleBuffer);
 		
-	thread t(network, m, cfg.rows, cfg.cols, cfg.port);
+	thread t(network, m, cfg.rows, cfg.cols, cfg.port, cfg.vlan, cfg.vlan_id);
 	
 	snprintf(filename, 25, "/tmp/LED_Matrix-%d.mem", cfg.channel);
 	if ((f = open(filename, O_RDWR)) < 0)

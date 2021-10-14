@@ -727,7 +727,7 @@ int main(int argc, char *argv[]) {
   int scroll_ms = 30;
   DemoRunner *demo_runner;
   const char *demo_parameter = NULL;
-  Matrix *m = new Matrix();
+  Matrix *m = new Matrix(0);
   
   while ((opt = getopt(argc, argv, "dD:r:P:c:p:b:m:LR:")) != -1) {
     switch (opt) {
