@@ -50,6 +50,8 @@ namespace LED_Matrix {
 			};
 		
 			pthread_t thread;
+			pthread_mutex_t b_lock;
+			pthread_mutex_t q_lock;
 			mqd_t queue;
 			bool stop;
 			bool doubleBuffer;

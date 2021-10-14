@@ -50,6 +50,10 @@ Matrix::Matrix(const char *iface, uint32_t channel, uint32_t r, uint32_t c, bool
 			throw -1;
 		
 		stop = false;
+		if (pthread_mutex_init(&b_lock, NULL) != 0)
+			throw errno;
+		if (pthread_mutex_init(&q_lock, NULL) != 0)
+			throw errno;
 		if (pthread_create(&thread, NULL, (void *(*)(void *)) &Matrix::send_frame_thread, this))
 			throw errno;
 	}
@@ -95,6 +99,8 @@ Matrix::~Matrix() {
 		pthread_join(thread, &result);
 		if (mq_close(queue) != -1)
 			mq_unlink(queue_name);
+		pthread_mutex_destroy(&b_lock);
+		pthread_mutex_destroy(&q_lock);
 	}
 }
 
@@ -116,13 +122,12 @@ void Matrix::clear() {
 
 void Matrix::set_brightness(uint8_t b) {
 	b %= 101;
-	
-	// TODO: add mutex(brightness)
-	
+	if (doubleBuffer)
+		pthread_mutex_lock(&b_lock);
 	b_raw = round(b / 100.0 * 255.0);
 	brightness = round(pow(b / 100.0, 0.405) * 255.0);
-	
-	// TODO: free mutex(brightness)
+	if (doubleBuffer)
+		pthread_mutex_unlock(&b_lock);
 }
 
 static void set_address(struct ether_header *header) {
@@ -185,7 +190,8 @@ void Matrix::send_frame_pkts(Queue_MSG frame) {
 		ptr[sizeof(struct ether_header) + 3] = htons(0x0107) >> 8;
 	}
 	
-	// TODO: Add mutex(brightness)
+	if (doubleBuffer)
+		pthread_mutex_lock(&b_lock);
 	
 	ptr[sizeof(struct ether_header) + 21 + offset] = b_raw;		// Global brightness? (Not used)
 	ptr[sizeof(struct ether_header) + 22 + offset] = 0x05;		// Enables brightness settings? (Unstable if not set)
@@ -221,7 +227,8 @@ void Matrix::send_frame_pkts(Queue_MSG frame) {
 	msgs[rows + 1].msg_hdr.msg_iov = &iovecs[1];
 	msgs[rows + 1].msg_hdr.msg_iovlen = 1;
 	
-	// TODO: free mutex(brightness)
+	if (doubleBuffer)
+		pthread_mutex_unlock(&b_lock);
 	
 	for (x = 0; x < rows; x++) {
 		ptr = (unsigned char *) malloc(sizeof(struct ether_header) + 7 + offset);
@@ -274,6 +281,11 @@ void *Matrix::send_frame_thread(void *arg) {
 }
 
 uint32_t Matrix::get_queue_num() {
-	return ++queue_num;						// TODO: add mutex
+	uint32_t result;
+	pthread_mutex_lock(&q_lock);
+	result = queue_num;
+	++queue_num;
+	pthread_mutex_unlock(&q_lock);
+	return result;
 }
 
