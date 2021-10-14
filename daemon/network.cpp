@@ -61,10 +61,12 @@ void func(Matrix *m, int client, uint32_t rows, uint32_t cols, bool vlan, uint16
 		
 		switch (p.command) {
 			case 0: // send_frame with VLAN
-				if (p.size == sizeof(id)) {
+				if (p.size == (sizeof(id) + sizeof(b))) {
 					if (transfer(client, false, &id, sizeof(id))) 
 						goto exit;
-					m->send_frame(true, id); 	// TODO: Fix this not be hard coded
+					if (transfer(client, false, &b, sizeof(b))) 
+						goto exit;
+					m->send_frame((bool) b, id);
 				}
 				else goto exit;
 				break;

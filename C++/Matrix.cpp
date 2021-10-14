@@ -100,8 +100,9 @@
  	}
  }
  
- /*void Matrix::send_frame(uint16_t vlan_id) {
+/*void Matrix::send_frame(uint16_t vlan_id) {
  	packet p;
+ 	uint8_t b = 1;
  	
  	if (!isNet) {
  		*(ptr + 1) = vlan_id >> 8;
@@ -113,14 +114,15 @@
  	else {
  		p.command = 0;
  		p.marker = marker;
- 		p.size = 2;
+ 		p.size = 3;
  		open_socket();
  		transfer(fd, true, &p, sizeof(p));
- 		transfer(fd, true, &vlan_id, p.size);
+ 		transfer(fd, true, &vlan_id, 2);
+ 		transfer(fd, true, &b, 1);
  		close(fd);
  	}
  
- }*/
+}*/
  
 void Matrix::set_pixel(uint32_t x, uint32_t y, Matrix_RGB_t pixel) {
 	map_pixel(&x, &y);

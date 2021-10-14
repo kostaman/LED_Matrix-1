@@ -12,8 +12,8 @@ import java.nio.*;
 import java.nio.channels.FileChannel;
 
 class Matrix {
-	Matrix(int r = 16, int c = 128) { // TODO: Add channel number
-		map = new RandomAccessFile("/tmp/LED_Matrix.mem", "rw").getChannel().map(FileChannel.MapMode.READ_WRITE, 0, new File("/tmp/LED_Matrix.mem").length())
+	Matrix(int chan, int r = 16, int c = 128) {
+		map = new RandomAccessFile(sprintf("/tmp/LED_Matrix-%c.mem", chan), "rw").getChannel().map(FileChannel.MapMode.READ_WRITE, 0, new File(sprintf("/tmp/LED_Matrix-%c.mem", chan)).length())
 		map.put(0, (Byte) 3)
 		while (map.get(0));
 		rows = (map.get(2) << 8) + map.get(3)
@@ -82,7 +82,7 @@ class Matrix {
 		else {
 			def s = new Socket(addr, port)
 			s.withStreams { istream, ostream ->
-				def data = [0x21, 0x20, 0x20, 0x09, 0, 2, 0, 0, vlan_id, vlan_id >> 8] as byte[]
+				def data = [0x21, 0x20, 0x20, 0x09, 0, 2, 0, 0, vlan_id, vlan_id >> 8, 1] as byte[]
 				ostream.write(data, 0, data.size())
 				ostream.flush()
 			}
