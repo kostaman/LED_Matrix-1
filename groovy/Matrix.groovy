@@ -12,7 +12,7 @@ import java.nio.*;
 import java.nio.channels.FileChannel;
 
 class Matrix {
-	Matrix(int chan, int r = 16, int c = 128) {
+	Matrix(int chan = 0, int r = 16, int c = 128) {
 		map = new RandomAccessFile(sprintf("/tmp/LED_Matrix-%c.mem", chan), "rw").getChannel().map(FileChannel.MapMode.READ_WRITE, 0, new File(sprintf("/tmp/LED_Matrix-%c.mem", chan)).length())
 		map.put(0, (Byte) 3)
 		while (map.get(0));
