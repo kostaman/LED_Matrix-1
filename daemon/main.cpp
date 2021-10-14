@@ -40,9 +40,9 @@ struct channel_cfg {
 	uint32_t rows;
 	uint32_t cols;
 	uint32_t channel;
-	uint16_t port;
+	uint32_t port;
 	bool vlan;
-	uint8_t vlan_id;
+	uint32_t vlan_id;
 	bool doubleBuffer;
 };
 
