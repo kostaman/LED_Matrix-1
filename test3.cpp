@@ -94,7 +94,7 @@ int main(int argc, char **argv) {
 						pixel.red = (char) 255;
 						pixel.green = (char) 128;
 					}
-					buffer[15][j * 8 + i] = pixel;
+					buffer[rows - 1][j * 8 + i] = pixel;
 				}
 			}
 			if (++counter >= 8) {
