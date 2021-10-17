@@ -27,7 +27,9 @@ Linux logic uses IO vectors in scatter gather configuration to support high perf
 
 VLAN enables channels via PoE switch which would enable a number of different applications using COTS solutions. Receiver cards also support chaining as an option. Physical LANs is also an alternative using multiple NICs.
 
-Note this will work with PWM/MM panels. You need to check the receiver card support, however this card has very good support. You may need to use a different firmware and configuration.
+Note this will work with PWM/MM panels. You need to check the receiver card support, however this card has very good support. You may need to use a different firmware and configuration. 
+
+In my testing there is a possible issue with PWM firmware with MBI5153 based panels. Changing images with Ethernet can cause small glitches randomly/periodically. LED panel current is very steady when Ethernet is not connected to receiver card. When receiver card is playing the same image over and over things work fine. So for static frame send periodically over Ethernet should work. Ethernet connected with not traffic does not cause an issue. No issues have been found with non-PWM panels and non-PWM firmware.
 
 ## About
 This logic works off shared memory map created by daemon. This enables other languages on the system to use the logic without inheriting/requiring super user. Shared memory map is creating in /tmp and is assumed to be a RAM disk or something like it. (This may not be desirable for every use case.)
