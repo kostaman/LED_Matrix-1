@@ -79,9 +79,10 @@ gcc -O3 trigger_remote.cpp ../C++/Matrix.cpp -o trigger_remote
 ```
 
 ## Running
-Daemon: (Assuming your ethernet interface is "ens33" and the receiver card is configured for 64x32.)
+Daemon:
 ```bash
-sudo ./Matrix "ens33" 64 32
+cd daemon
+sudo ./Matrix config.txt
 ```
 Demo:
 ```bash
