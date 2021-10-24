@@ -46,6 +46,8 @@ This code base is very straight forward, and this logic is fairly light weight. 
 
 Therefore converting this to something not based in Linux would be straightforward, given it can generate L2 packets.
 
+I am not planning to add support for anything other than ColorLight. There are other options and I am aware of how to do that. However I am impressed with ColorLights receivers even considering the PWM issue. I had a bad experience with Linsn. The card died for unknown reason(s), software quality was lower, software is harder to work with, and PWM issues are worse. Here is an [example](https://github.com/FalconChristmas/fpp/blob/master/src/channeloutput/Linsn-RV9.cpp) that roughly matches my understanding of how it would work.
+
 ## License
 This project is licensed under standard GPL 3. A copy is available [here](https://github.com/daveythacher/LED_Matrix/blob/main/LICENSE), for more details about terms and conditions that apply.
 
