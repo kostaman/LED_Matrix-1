@@ -188,6 +188,11 @@ For refresh enhancement there is also two major types, traditional PWM and scrab
 
 PWM generators are usually clock via a grayscale clock. This clock derives the refresh rate. The clock rate is the number of PWM steps times the multiplex scan and frame rate. S-PWM divides the PWM steps so it increases the refresh rate. Note for traditional PWM the frame rate may be the refresh rate.
 
+##### S-PWM on Pi and MCUs
+This believed to be challenging on the Pi due to scheduling and arbitration issues which can emergy. Scheduling and arbitration issues examples: OS schdeuling due to tick rate (4ms), DDR memory inteferace arbriration, DDR burst delay, Atomic GPIO port arbitration, system bus arbitration, interrupts, kernel events, etc. BCM using tradditional PWM tend to work out a lot of these issues assuming proper configuration. Note CPU is used over DMA due to DDR as L1 cache is SRAM and increases DDR efficiency.
+
+It is believe this is possible on some or many MCUs due to more executive control, deteriminism, IO resources, SRAM, etc. However to date I am not aware of this existing. Most real time operating systems can achieve better tick rates. MCUs tend to have options like paced hardware modules, FIFOs, DMA based on SRAM, more control of priority/arbitration, etc. However suffer in processing capabity, cost and memory density.
+
 ### LED Rail Voltage
 To lower the power consumption of the LED panels there is two methods, lower the current and/or lower the voltage. If you lower the voltage to the panels you will lose white color balance as the red LED current drivers will likely remain operational longer than the green and blue LEDs. This is due to the fact that LEDs are diodes which means voltage is not directly correlated with current.
 
