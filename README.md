@@ -193,6 +193,8 @@ This believed to be challenging on the Pi due to scheduling and arbitration issu
 
 It is believe this is possible on some or many MCUs due to more executive control, deteriminism, IO resources, SRAM, etc. However to date I am not aware of this existing. Most real time operating systems can achieve better tick rates. MCUs tend to have options like paced hardware modules, FIFOs, DMA based on SRAM, more control of priority/arbitration, etc. However suffer in processing capabity, cost and memory density.
 
+Note this may increase overhead and increase configuration complexity. It should be possible to integrate this with BCM but may be a little weird.
+
 ### LED Rail Voltage
 To lower the power consumption of the LED panels there is two methods, lower the current and/or lower the voltage. If you lower the voltage to the panels you will lose white color balance as the red LED current drivers will likely remain operational longer than the green and blue LEDs. This is due to the fact that LEDs are diodes which means voltage is not directly correlated with current.
 
