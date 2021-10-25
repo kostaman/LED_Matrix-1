@@ -10,7 +10,7 @@ The receiver card supports:
 - gamma correction
 - memory map
 - current gain (depending on panel)
-- PWM drivers (depending on panel, see below)
+- PWM drivers (depending on panel, see [below](https://github.com/daveythacher/LED_Matrix/blob/main/README.md#pwm-support))
 - high refresh (depending on configuration)
 - high quality (depending on configuration)
 - low cost
