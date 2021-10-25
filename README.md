@@ -172,6 +172,33 @@ Note up to 2.72 Watts of the 12.95 is lost to internal conversion. Meaning an ef
 
 Note stealing additional power from LEDs is also possible which may result in a trivial amount of brightness reduction. However this is not recommended. Even less so is possibly limiting the number of RGB pixels on at a time to limit LED power consumption.
 
+### Color Depth
+Most RGB images use 24 bit color depth meaning there is 16.7 million colors. However supporting this on LED matrixes is complicated issue. Many LEDs have a max forward current of 20mA but can light around a few microamps. Many panels white color balance at 5 volts with a R/G/B current ratio of around 16/9/7mA. Meaning the max current steps possible is around 7000. Multiplexing however can lower this to 218 for 32 scan, which means we are down to around 8 bits of color depth per color.
+
+However LED brightness is directly correlated to current. However LED color perception is not directly correlated to current. A mapping function must be used which increases the grandularity of current division to achieve higher accuracy or control over the color perception. This means that for a 8 bit color depth input per color you will need to use possible 11 bits of color depth per color.
+
+Naturally there could be slight or significant reduction of color depth if the panels is not capable of supporting the full color depth required. For example the green LED may not have enough color depth to support full color with the mapping algorithm. However this is not fully understood. For most many uses cases this may be hard to notice.
+
+Note mileage will vary. Some panels are built with lower multiplex ratios and some LEDs have better color depth.
+
+#### PWM
+Most commonly dividing the current is done with BCM. There are two major types of PWM, hardware and software. For hardware PWM the LED drivers like have standard PWM generators. While for software PWM there is likely indirect control via shift registers using binary coded modulation (BCM) or sometimes called bit angle modulation (BAM).
+
+For refresh enhancement there is also two major types, traditional PWM and scrabled PWM (S-PWM). Traditional PWM will spend the entire PWM period per row. While S-PWM will divide the PWM period into segments and only spend one segment per row. This the overall perceptive refresh is increased with S-PWM. S-PWM is believed to be used in receiver cards for non-PWM LED panels. Memory mapped (MM) LED drivers commonly use S-PWM along with some PWM LED drivers.
+
+PWM generators are usually clock via a grayscale clock. This clock derives the refresh rate. The clock rate is the number of PWM steps times the multiplex scan and frame rate. S-PWM divides the PWM steps so it increases the refresh rate. Note for traditional PWM the frame rate may be the refresh rate.
+
+### LED Rail Voltage
+To lower the power consumption of the LED panels there is two methods, lower the current and/or lower the voltage. If you lower the voltage to the panels you will lose white color balance as the red LED current drivers will likely remain operational longer than the green and blue LEDs. This is due to the fact that LEDs are diodes which means voltage is not directly correlated with current.
+
+In order to get this balance back you need to rebalance the current per color in roughly the same ratios. Each LEDs has its own forward voltage threshold however most of the time the red LEDs is much lower than green and especially blue. The high side PMOS drivers need a small amount of voltage drop for stable operation. As does the low side constant current drivers. Therefore if you lower the 5 volts rail to 3.3 volts, assuming the logic components can tolerate this, you will need to rebase the current for stable operation. This will vary from panel to panel.
+
+There are two major ways to do this. Most panels use current amplifiers internally. The amplifiers uses a reference current which is then multipled by fixed multiplier to change the current. This reference current is set using a known voltage and resistor. In most panels you need to change the panels. The other approach is to use the software gain control which allows changing the fixed gain multiplier, therefore a resistor change may not be required.
+
+Usually you will need to track down the LED driver datasheet to get things like the multipler, reference voltage, stable current thresholds, etc. After getting the resistances from the SMD resistors you can work back the ratios and resistances. From here you just lower the currents till stable or to the desired power operating level. 
+
+Thus for lowering the voltage you must lower the current most of the time. You will be able to use the panel at higher voltage, but in order to get the lower power draw or high efficiency you will need to lower the voltage also. This is likely required for PoE operation.
+
 ## VLAN / Switch
 It is recommended to use VLAN to contain packet transmission. While not required it may be desired for security or functional purposes. The reason for the recommendation is prevent flooding, which is possible since the L2 switch may never be able to associate the packet to a single port. This may sound like a flaw but it is potentially more stable. These are likely designed to work on dedicated L2 segements anyhow for stability concerns. VLANs are an alternative to physical segementation.
 
