@@ -10,7 +10,7 @@ The receiver card supports:
 - gamma correction
 - memory map
 - current gain (depending on panel)
-- PWM drivers (depending on panel)
+- PWM drivers (depending on panel, see below)
 - high refresh (depending on configuration)
 - high quality (depending on configuration)
 - low cost
@@ -27,9 +27,16 @@ Linux logic uses IO vectors in scatter gather configuration to support high perf
 
 VLAN enables channels via PoE switch which would enable a number of different applications using COTS solutions. Receiver cards also support chaining as an option. Physical LANs is also an alternative using multiple NICs.
 
+#### PWM Support
 Note this will work with PWM/MM panels. You need to check the receiver card support, however this card has very good support. You may need to use a different firmware and configuration. 
 
-In my testing there is a possible issue with PWM firmware with MBI5153 based panels. Changing images with Ethernet can cause small glitches randomly/periodically. LED panel current is very steady when Ethernet is not connected to receiver card. When receiver card is playing the same image over and over things work fine. So for static frame send periodically over Ethernet should work. Ethernet connected with not traffic does not cause an issue. No issues have been found with non-PWM panels and non-PWM firmware.
+In my testing there is a possible issue with PWM firmware with MBI5153 based panels. Changing images with Ethernet can cause small glitches randomly/periodically. LED panel current is very steady when Ethernet is not connected to receiver card. When receiver card is playing the same image over and over things work fine. So for static frame send periodically over Ethernet should work. Ethernet connected without traffic does not cause an issue. No issues have been found with non-PWM panels and non-PWM firmware.
+
+S2 Sender Card was tested with MBI5153 based panels using the same receiver card and configuration. No issues were detected with the sender card. Packet captures show that the sender card fully saturates the 1G link. A slighyl different protocol was used and some of these changes were evaluated. However the result still remains. It is believe this is due to some kind of timing property which user space Linux is not able to achieve. Honestly I doubt there is a section of the kernel that is capable of this due to overhead.
+
+A hardware module could be build which replaces the S2 sender card, however this would be very expensive and time consuming. Not likely to be very popular so in many ways it just does not make sense. Overall using receiver card baring firmware update for PWM/MM panels is not recommended unless doing video wall. To use S2 sender card with Pi it is recommended you use a Pi via HDMI to S2's DVI connector and create graphics program.
+
+Alternatively a software library for Pi or MCU like iMX or RP2040 would be recommended. These are only really economically viable for very smalls displays of less than 18 panels. To data no library exists for this. There is one for ESP32 using ICN2053 which supports couple panels at the most. It could in theory support more but this requires a software change.
 
 ## About
 This logic works off shared memory map created by daemon. This enables other languages on the system to use the logic without inheriting/requiring super user. Shared memory map is creating in /tmp and is assumed to be a RAM disk or something like it. (This may not be desirable for every use case.)
