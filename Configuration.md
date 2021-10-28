@@ -13,6 +13,8 @@ The configuration file requires five lines per channel. Note there is no blank l
 
 The first line contains the channel number (0 to 255) followed by TCP port (0 to 65535) separated by a single space. The second line contains the networking interface name as a string as seen by ifconfig. Note multiple channels can use the same or different interface name. The third line contains the number of rows (1 to 1024) used by the receiver card followed by the number of columns (1 to 1024) used by the receiver card separated by a single space. Note these must match the configuration settings of the receiver card. The forth line contains the double buffering enable flag (1 for on/true and 0 for off/false). The fifth line contains the VLAN enable flag (1 for VLAN and 0 for non-VLAN) followed by the VLAN id (0 - 4095) separated by a single space. Note the id must always be provided, however is only used if enabled.
 
+Note channels should never share an interface without a VLAN. Channels should not share a VLAN ever, unless port mirroring is used.
+
 Note wrapper classes will not work without daemon running. Daemon needs to be ran with super user rights. The application logic/wrapper does not require this, and this is the point of the daemon. (To restrict the priviledge scope.) The point of users, kernel, etc. is to not have things running with full control/access. This does create some overhead which in some applications is undesireable, raw source is available for them. In most case with this type of logic there will be little to no impact. The intensive functions which would normally be corrupted by this are relocated off device.
 
 ## Wrapper
