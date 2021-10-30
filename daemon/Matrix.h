@@ -57,6 +57,9 @@ namespace LED_Matrix {
 			bool doubleBuffer;
 			static uint32_t queue_num;
 			const char *queue_name = "/queue";
+			const uint32_t max_rows = 512;
+			const uint32_t max_cols = 1280;
+			const uint32_t cols_per_pkt = 497;
 			
 			void send_frame_pkts(Queue_MSG frame);
 			static void *send_frame_thread(void *arg);
