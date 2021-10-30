@@ -37,13 +37,13 @@ Matrix::Matrix(const char *iface, uint32_t channel, uint32_t r, uint32_t c, bool
 	unsigned dhost[] = { 0x11, 0x22, 0x33, 0x44, 0x55, 0x66 };
 	struct mq_attr attr;
 	
-	// Reducing max size to simplify protocol.
+	// Reducing max size to simplify protocol. (CPU cannot keep up anyhow.)
 	//	Max per 5A-75E receiver is 512x256
 	//	Max per 5A-75B receiver is 256x256
 	//	Max per Ethernet chain is 512x1280
 	//	Max per S2 sender is 1024x1280
-	rows = r % 256;
-	cols = c % 256;
+	rows = r % 512;
+	cols = c % 497;
 	
 	brightness = 0xFF;
 	b_raw = 0xFF;
@@ -245,18 +245,18 @@ void Matrix::send_frame_pkts(Queue_MSG frame) {
 		memset(ptr, 0, sizeof(struct ether_header) + 7 + offset);
 		header = (struct ether_header *) ptr;
 		if (!frame.vlan)
-			header->ether_type = htons(0x5500);
+			header->ether_type = htons(0x5500 + (x >> 8));
 		else
 			header->ether_type = htons(0x8100);
 		set_address(header);
 		if (frame.vlan) {
 			ptr[sizeof(struct ether_header) + 0] = (0xE << 4) | (frame.vlan_id >> 8);
 			ptr[sizeof(struct ether_header) + 1] = frame.vlan_id & 0xFF;
-			ptr[sizeof(struct ether_header) + 2] = htons(0x5500) & 0xFF;
+			ptr[sizeof(struct ether_header) + 2] = htons(0x5500 + (x >> 8)) & 0xFF;
 			ptr[sizeof(struct ether_header) + 3] = htons(0x5500) >> 8;
 		}
 		ptr[sizeof(struct ether_header) + offset] = x & 0xFF;
-		//ptr[sizeof(struct ether_header) + 3 + offset] = cols >> 8;
+		ptr[sizeof(struct ether_header) + 3 + offset] = cols >> 8;
 		ptr[sizeof(struct ether_header) + 4 + offset] = cols & 0xFF;
 		ptr[sizeof(struct ether_header) + 5 + offset] = 0x08;	// Function unknown
 		ptr[sizeof(struct ether_header) + 6 + offset] = 0x88;	// Function unknown
@@ -295,4 +295,3 @@ uint32_t Matrix::get_queue_num() {
 	pthread_mutex_unlock(&q_lock);
 	return result;
 }
-
