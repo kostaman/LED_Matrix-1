@@ -41,7 +41,7 @@ Alternatively a software library for Pi or MCU like iMX or RP2040 would be recom
 ## About
 This logic works off shared memory map created by daemon. This enables other languages on the system to use the logic without inheriting/requiring super user. Shared memory map is creating in /tmp and is assumed to be a RAM disk or something like it. (This may not be desirable for every use case.)
 
-Shared memory was choosen to avoid overhead of other methods. There is a command interface built into the first four bytes of memory. The daemon will poll this periodically to activate Matrix functions. Double buffering may come later however currently logic should wait for the command to be reset back to zero before proceeding. Current implementation is blocking to prevent writing while updating issues. (Also due to laziness.)
+Shared memory was choosen to avoid overhead of other methods. There is a command interface built into the first four bytes of memory. The daemon will poll this periodically to activate Matrix functions. Currently calling logic should wait for the command to be reset back to zero before proceeding. Current implementation is blocking to prevent writing while updating issues. (Also due to laziness.)
 
 Note there is no protection against race conditions and hazards on shared memory. If multiple processors grab there could be problems, however this is not expected to be very common. TCP logic currently processes connections serially one at a time to prevent this issue and possible resource usage issues. Note this is still a work in progress and very lazy.
 
@@ -65,7 +65,7 @@ See [Configuration](https://github.com/daveythacher/LED_Matrix/blob/main/Configu
 Daemon:
 ```bash
 cd daemon
-g++ -O3 Matrix.cpp network.cpp main.cpp -o Matrix -lpthread -lrt
+g++ -O3 Matrix.cpp network.cpp main.cpp -o Matrix -lpthread
 ```
 Demo:
 ```bash
