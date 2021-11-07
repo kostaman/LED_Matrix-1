@@ -66,7 +66,6 @@ int main(int argc, char **argv) {
 		cfg >> c.channel >> c.port;
 		cfg >> c.iface;
 		cfg >> c.rows >> c.cols;
-		cfg >> c.doubleBuffer;
 		cfg >> c.vlan >> c.vlan_id;
 		
 		if (!cfg.fail() && !cfg.eof())
@@ -93,7 +92,7 @@ void channel_thread(channel_cfg cfg) {
 	int f;
 	char filename[25];
 	volatile uint8_t *ptr;
-	Matrix *m = new Matrix(cfg.iface.c_str(), cfg.channel, cfg.rows, cfg.cols, cfg.doubleBuffer);
+	Matrix *m = new Matrix(cfg.iface.c_str(), cfg.channel, cfg.rows, cfg.cols);
 		
 	thread t(network, m, cfg.rows, cfg.cols, cfg.port, cfg.vlan, cfg.vlan_id);
 	
@@ -142,4 +141,3 @@ void channel_thread(channel_cfg cfg) {
 		}
 	}
 }
-
