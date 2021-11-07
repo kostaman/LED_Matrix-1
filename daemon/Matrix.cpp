@@ -42,8 +42,8 @@ Matrix::Matrix(const char *iface, uint32_t channel, uint32_t r, uint32_t c, bool
 	//	Max per 5A-75B receiver is 256x256
 	//	Max per Ethernet chain is 512x1280
 	//	Max per S2 sender is 1024x1280
-	rows = r % max_rows;
-	cols = c % max_cols;
+	rows = r % (max_rows + 1);
+	cols = c % (max_cols + 1);
 	
 	brightness = 0xFF;
 	b_raw = 0xFF;
@@ -240,49 +240,52 @@ void Matrix::send_frame_pkts(Queue_MSG frame) {
 		pthread_mutex_unlock(&b_lock);
 	
 	for (x = 0; x < rows; x++) {
-	   uint32_t i = 0;
-	   for (uint32_t y = cols; y > 0; y -= std::min(cols_per_pkt, y)) {
-		   ptr = (unsigned char *) malloc(sizeof(struct ether_header) + 7 + offset);
-		   iovecs[(x * 2 * pkts_per_row) + 2 + (2 * i)].iov_base = ptr;
-		   iovecs[(x * 2 * pkts_per_row) + 2 + (2 * i)].iov_len = sizeof(struct ether_header) + 7 + offset;
-		   memset(ptr, 0, sizeof(struct ether_header) + 7 + offset);
-		   header = (struct ether_header *) ptr;
-		   if (!frame.vlan)
-			   header->ether_type = htons(0x5500 + (x >> 8));
-		   else
-			   header->ether_type = htons(0x8100);
-		   set_address(header);
-		   if (frame.vlan) {
-			   ptr[sizeof(struct ether_header) + 0] = (0xE << 4) | (frame.vlan_id >> 8);
-			   ptr[sizeof(struct ether_header) + 1] = frame.vlan_id & 0xFF;
-			   ptr[sizeof(struct ether_header) + 2] = htons(0x5500 + (x >> 8)) & 0xFF;
-			   ptr[sizeof(struct ether_header) + 3] = htons(0x5500) >> 8;
-		   }
-		   ptr[sizeof(struct ether_header) + offset] = x & 0xFF;
-		   ptr[sizeof(struct ether_header) + 1 + offset] = (cols - y) >> 8;
-		   ptr[sizeof(struct ether_header) + 2 + offset] = (cols - y) & 0xFF;
-		   ptr[sizeof(struct ether_header) + 3 + offset] = std::min(cols_per_pkt, y) >> 8;
-		   ptr[sizeof(struct ether_header) + 4 + offset] = std::min(cols_per_pkt, y) & 0xFF;
-		   ptr[sizeof(struct ether_header) + 5 + offset] = 0x08;	// Function unknown
-		   ptr[sizeof(struct ether_header) + 6 + offset] = 0x88;	// Function unknown
-		   iovecs[(x * 2 * pkts_per_row) + 3 + (2 * i)].iov_base = (frame.buffer + (x * cols) + cols - y);
-		   iovecs[(x * 2 * pkts_per_row) + 3 + (2 * i)].iov_len = std::min(cols_per_pkt, y) * sizeof(Matrix_RGB_t);
-		   msgs[(x * pkts_per_row) + i].msg_hdr.msg_iov = &iovecs[(x * 2 * pkts_per_row) + 2];
-		   msgs[(x * pkts_per_row) + i].msg_hdr.msg_iovlen = 2 * pkts_per_row;
-		   i++;
-      }
-	}
+		uint32_t i = 0;
+		for (uint32_t y = cols; y > 0; y -= std::min(cols_per_pkt, y)) {
+			ptr = (unsigned char *) malloc(sizeof(struct ether_header) + 7 + offset);
+			iovecs[(x * 2 * pkts_per_row) + 2 + (2 * i)].iov_base = ptr;
+			iovecs[(x * 2 * pkts_per_row) + 2 + (2 * i)].iov_len = sizeof(struct ether_header) + 7 + offset;
+			memset(ptr, 0, sizeof(struct ether_header) + 7 + offset);
+			header = (struct ether_header *) ptr;
+			if (!frame.vlan)
+				header->ether_type = htons(0x5500 + (x >> 8));
+			else
+				header->ether_type = htons(0x8100);
+			set_address(header);
+			if (frame.vlan) {
+				ptr[sizeof(struct ether_header) + 0] = (0xE << 4) | (frame.vlan_id >> 8);
+				ptr[sizeof(struct ether_header) + 1] = frame.vlan_id & 0xFF;
+				ptr[sizeof(struct ether_header) + 2] = htons(0x5500 + (x >> 8)) & 0xFF;
+				ptr[sizeof(struct ether_header) + 3] = htons(0x5500) >> 8;
+			}
+			ptr[sizeof(struct ether_header) + offset] = x & 0xFF;
+			ptr[sizeof(struct ether_header) + 1 + offset] = (cols - y) >> 8;
+			ptr[sizeof(struct ether_header) + 2 + offset] = (cols - y) & 0xFF;
+			ptr[sizeof(struct ether_header) + 3 + offset] = std::min(cols_per_pkt, y) >> 8;
+			ptr[sizeof(struct ether_header) + 4 + offset] = std::min(cols_per_pkt, y) & 0xFF;
+			ptr[sizeof(struct ether_header) + 5 + offset] = 0x08;	// Function unknown
+			ptr[sizeof(struct ether_header) + 6 + offset] = 0x88;	// Function unknown
+			iovecs[(x * 2 * pkts_per_row) + 3 + (2 * i)].iov_base = (frame.buffer + (x * cols) + cols - y);
+			iovecs[(x * 2 * pkts_per_row) + 3 + (2 * i)].iov_len = std::min(cols_per_pkt, y) * sizeof(Matrix_RGB_t);
+			msgs[(x * pkts_per_row) + i].msg_hdr.msg_iov = &iovecs[(x * 2 * pkts_per_row) + (2 * i) + 2];
+			msgs[(x * pkts_per_row) + i].msg_hdr.msg_iovlen = 2;
+			i++;
+		}
+	}	
 	
-	if (sendmmsg(fd, msgs, (rows * pkts_per_row) + 2, 0) != ((rows * pkts_per_row) + 2))
+	for (int i = 0; i < pkts_per_row; ++i)
+		if (sendmmsg(fd, &msgs[i * rows], rows, 0) != rows)
+			throw errno;
+	if (sendmmsg(fd, &msgs[pkts_per_row * rows], 2, 0) != 2)
 		throw errno;
 		
 	for (x = 0; x < rows; x++) {
-	   uint32_t i = 0;
-	   for (uint32_t y = cols; y > 0; y -= std::min(cols_per_pkt, y)) {
-	      free(iovecs[(x * 2 * pkts_per_row) + 2 + (2 * i)].iov_base);
-	      i++;
-	   }
-   }
+		uint32_t i = 0;
+		for (uint32_t y = cols; y > 0; y -= std::min(cols_per_pkt, y)) {
+			free(iovecs[(x * 2 * pkts_per_row) + 2 + (2 * i)].iov_base);
+			i++;
+		}
+   	}
 }
 
 void *Matrix::send_frame_thread(void *arg) {
