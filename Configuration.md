@@ -6,12 +6,12 @@
 ## Daemon
 The daemon needs to be configured with a configuration file. Multiple channels are supported now. Each channel requires eight parameters.
 
-Note two threads are used per channel unless double buffering is enabled which increases this to three. 
+Note two threads are used per channel. 
 
 ### Configuration File
-The configuration file requires five lines per channel. Note there is no blank lines in configuration file, therefore channels start one after the other. The configuration file logic is very simple and brittle.
+The configuration file requires four lines per channel. Note there is no blank lines in configuration file, therefore channels start one after the other. The configuration file logic is very simple and brittle.
 
-The first line contains the channel number (0 to 255) followed by TCP port (0 to 65535) separated by a single space. The second line contains the networking interface name as a string as seen by ifconfig. Note multiple channels can use the same or different interface name. The third line contains the number of rows (1 to 1024) used by the receiver card followed by the number of columns (1 to 1024) used by the receiver card separated by a single space. Note these must match the configuration settings of the receiver card. The forth line contains the double buffering enable flag (1 for on/true and 0 for off/false). The fifth line contains the VLAN enable flag (1 for VLAN and 0 for non-VLAN) followed by the VLAN id (0 - 4095) separated by a single space. Note the id must always be provided, however is only used if enabled.
+The first line contains the channel number (0 to 255) followed by TCP port (0 to 65535) separated by a single space. The second line contains the networking interface name as a string as seen by ifconfig. Note multiple channels can use the same or different interface name. The third line contains the number of rows (1 to 1024) used by the receiver card followed by the number of columns (1 to 1024) used by the receiver card separated by a single space. Note these must match the configuration settings of the receiver card. The forth line contains the VLAN enable flag (1 for VLAN and 0 for non-VLAN) followed by the VLAN id (0 - 4095) separated by a single space. Note the id must always be provided, however is only used if enabled.
 
 Note channels should never share an interface without a VLAN. Channels should not share a VLAN ever, unless port mirroring is used.
 
