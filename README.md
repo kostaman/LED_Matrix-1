@@ -38,6 +38,8 @@ S2 Sender Card was tested with MBI5153 based panels using the same receiver card
 
 A hardware module could be build which replaces the S2 sender card, however this would be somewhat costly and time consuming. Not likely to be very popular so in many ways it just does not make sense. Overall using receiver card baring firmware update for PWM/MM panels is not recommended unless doing video wall. To use S2 sender card with Pi it is recommended you use a Pi via HDMI to S2's DVI connector and create graphics program.
 
+A working version of this hardware module is available in [LED_Matrix_PIC32MZ](https://github.com/daveythacher/LED_Matrix_PIC32MZ). This works as a sync sender card. Effort was made to control the timing of the packets so that it would not cause issues. These level of control is much harder, if even possible, in this code base.
+
 ## About
 This logic works off shared memory map created by daemon. This enables other languages on the system to use the logic without inheriting/requiring super user. Shared memory map is creating in /tmp and is assumed to be a RAM disk or something like it. (This may not be desirable for every use case.)
 
