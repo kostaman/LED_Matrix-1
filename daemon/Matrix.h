@@ -10,8 +10,6 @@
 #define	Matrix_H
 
 #include <stdint.h>
-#include <mqueue.h>
-#include <pthread.h>
 
 namespace LED_Matrix {
 	struct Matrix_RGB_t {
