@@ -17,6 +17,11 @@ Note channels should never share an interface without a VLAN. Channels should no
 
 Note wrapper classes will not work without daemon running. Daemon needs to be ran with super user rights. The application logic/wrapper does not require this, and this is the point of the daemon. (To restrict the priviledge scope.) The point of users, kernel, etc. is to not have things running with full control/access. This does create some overhead which in some applications is undesireable, raw source is available for them. In most case with this type of logic there will be little to no impact. The intensive functions which would normally be corrupted by this are relocated off device.
 
+### PIC32MZ NetCard over USB
+The daemon has been modified to support using PIC32MZ NetCard. The same configuration file is used, using the same structure. To add an entry for PIC32MZ NetCard over USB, set the networking interface name to USB, just those three characters. Note VLAN settings are ignored, as these are not supported by the PIC32MZ NetCard. Everything else works the exact same.
+
+Note the set_brightness method does not work on PIC32MZ NetCard's current USB protocol and firmware. This could be added later on.
+
 ## Wrapper
 To my knowledge there is no way of converting the panel/cabinet pixel configuration to the desired pixel configuration. This is easily corrected with a mapping function. Currently this requires creating a derived wrapper Matrix class. This requires coding.
 
