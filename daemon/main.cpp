@@ -96,7 +96,7 @@ void channel_thread(channel_cfg cfg) {
 	NetCard *m;
 	
 	if (cfg.iface == "USB")
-		m = new PIC32MZ_NetCard(cfg.channel);
+		m = new PIC32MZ_NetCard(cfg.channel, cfg.rows, cfg.cols);
 	else
 		m = new Linux_NetCard(cfg.iface.c_str(), cfg.channel, cfg.rows, cfg.cols);
 		
