@@ -1,5 +1,5 @@
 /* 
- * File:   Matrix.cpp
+ * File:   Linux_NetCard.cpp
  * Author: David Thacher
  * License: GPL 3.0
  *
@@ -22,18 +22,17 @@
 #include <stdio.h>
 #include <algorithm>
 #include <cmath>
-#include "Matrix.h"
-using LED_Matrix::Matrix;
-using LED_Matrix::Matrix_RGB_t;
+#include "Linux_NetCard.h"
+using Matrix::Linux_NetCard;
+using Matrix::Matrix_RGB_t;
 
-Matrix::Matrix(const char *iface, uint32_t channel, uint32_t r, uint32_t c) {
+Linux_NetCard::Linux_NetCard(const char *iface, uint32_t channel, uint32_t r, uint32_t c) {
 	int f;
 	uint32_t *ptr;
 	char filename[25];
 	struct ifreq if_idx;
 	struct sockaddr_ll sock_addr;
 	unsigned dhost[] = { 0x11, 0x22, 0x33, 0x44, 0x55, 0x66 };
-	struct mq_attr attr;
 	
 	// Reducing max size to simplify protocol. (CPU cannot keep up anyhow.)
 	//	Max per 5A-75E receiver is 512x256
@@ -80,23 +79,23 @@ Matrix::Matrix(const char *iface, uint32_t channel, uint32_t r, uint32_t c) {
 		throw errno;
 }
 
-void Matrix::set_pixel_raw(uint32_t x, uint32_t y, Matrix_RGB_t pixel) {
+void Linux_NetCard::set_pixel_raw(uint32_t x, uint32_t y, Matrix_RGB_t pixel) {
 	y %= rows;
 	x %= cols;
     	*(buffer + (y * cols) + x) = pixel;
 }
 
-void Matrix::fill(Matrix_RGB_t pixel) {
+void Linux_NetCard::fill(Matrix_RGB_t pixel) {
     	for (uint32_t x = 0; x < cols; x++)
     		for (uint32_t y = 0; y < rows; y++)
     			*(buffer + (y * cols) + x) = pixel;
 }
 
-void Matrix::clear() {
+void Linux_NetCard::clear() {
 	fill(Matrix_RGB_t(0, 0, 0));	
 }
 
-void Matrix::set_brightness(uint8_t b) {
+void Linux_NetCard::set_brightness(uint8_t b) {
 	b %= 101;
 	b_raw = round(b / 100.0 * 255.0);
 	brightness = round(pow(b / 100.0, 0.405) * 255.0);
@@ -118,7 +117,7 @@ static void set_address(struct ether_header *header) {
 }
 
 // TODO: Reduce duplication of effort
-void Matrix::send_frame(bool vlan, uint16_t vlan_id) {
+void Linux_NetCard::send_frame(bool vlan, uint16_t vlan_id) {
 	uint32_t offset = 0;
 	uint32_t pkts_per_row = cols % cols_per_pkt ? (cols / cols_per_pkt) + 1 : cols / cols_per_pkt;
 	struct mmsghdr msgs[(rows * pkts_per_row) + 2];
@@ -233,3 +232,4 @@ void Matrix::send_frame(bool vlan, uint16_t vlan_id) {
 		}
    	}
 }
+

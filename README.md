@@ -67,7 +67,7 @@ See [Configuration](https://github.com/daveythacher/LED_Matrix/blob/main/Configu
 Daemon:
 ```bash
 cd daemon
-g++ -O3 Matrix.cpp network.cpp main.cpp -o Matrix -lpthread
+g++ -O3 PIC32MZ_NetCard.cpp Linux_NetCard.cpp main.cpp network.cpp -o Matrix -lpthread -lusb-1.0
 ```
 Demo:
 ```bash

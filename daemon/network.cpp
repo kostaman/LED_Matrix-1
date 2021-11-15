@@ -16,9 +16,9 @@
 //#include <thread>
 //using std::thread;
 
-#include "Matrix.h"
-using LED_Matrix::Matrix;
-using LED_Matrix::Matrix_RGB_t;
+#include "NetCard.h"
+using Matrix::NetCard;
+using Matrix::Matrix_RGB_t;
 
 struct packet {
 	uint32_t marker;
@@ -45,7 +45,7 @@ int transfer(int client, bool out, void *ptr, uint32_t len) {
 	return result;
 }
 
-void func(Matrix *m, int client, uint32_t rows, uint32_t cols, bool vlan, uint16_t vlan_id) {
+void func(NetCard *m, int client, uint32_t rows, uint32_t cols, bool vlan, uint16_t vlan_id) {
 	packet p;
 	uint64_t val;
 	uint16_t id;
@@ -132,7 +132,7 @@ exit:
 	close(client);
 }
 
-void network(Matrix *m, uint32_t rows, uint32_t cols, uint16_t port, bool vlan, uint16_t id) {
+void network(NetCard *m, uint32_t rows, uint32_t cols, uint16_t port, bool vlan, uint16_t id) {
 	int server, handle;
 	socklen_t len;
 	struct sockaddr_in sock, client;

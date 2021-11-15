@@ -29,9 +29,10 @@ using std::vector;
 #include <string>
 using std::string;
 
-#include "Matrix.h"
-using LED_Matrix::Matrix;
-using LED_Matrix::Matrix_RGB_t;
+#include "NetCard.h"
+#include "Linux_NetCard.h"
+#include "PIC32MZ_NetCard.h"
+using namespace Matrix;
 
 const int FPS = 60;
 
@@ -46,7 +47,7 @@ struct channel_cfg {
 	bool doubleBuffer;
 };
 
-extern void network(Matrix *m, uint32_t rows, uint32_t cols, uint16_t port, bool vlan, uint16_t id);
+extern void network(NetCard *m, uint32_t rows, uint32_t cols, uint16_t port, bool vlan, uint16_t id);
 void channel_thread(channel_cfg cfg);
 
 int main(int argc, char **argv) {
@@ -92,7 +93,12 @@ void channel_thread(channel_cfg cfg) {
 	int f;
 	char filename[25];
 	volatile uint8_t *ptr;
-	Matrix *m = new Matrix(cfg.iface.c_str(), cfg.channel, cfg.rows, cfg.cols);
+	NetCard *m;
+	
+	if (cfg.iface == "USB")
+		m = new PIC32MZ_NetCard(cfg.channel, cfg.rows, cfg.cols);
+	else
+		m = new Linux_NetCard(cfg.iface.c_str(), cfg.channel, cfg.rows, cfg.cols);
 		
 	thread t(network, m, cfg.rows, cfg.cols, cfg.port, cfg.vlan, cfg.vlan_id);
 	
