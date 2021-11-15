@@ -16,7 +16,7 @@
 namespace Matrix {
 	class PIC32MZ_NetCard : public NetCard {
 		public:
-			PIC32MZ_NetCard();
+			PIC32MZ_NetCard(uint32_t channel);			// TODO: Allow optimizing memory usage, USB bandwidth and performance with rows and columns
 
 			void send_frame(bool vlan, uint16_t vlan_id);
 			void set_pixel_raw(uint32_t x, uint32_t y, Matrix_RGB_t pixel);
@@ -38,6 +38,7 @@ namespace Matrix {
 			};
 
 			RGB_Packet_t buffer[ROW / SCALER];
+			Matrix_RGB_t *mm;
 
 		private:
 			static void worker(libusb_device_handle *handle, RGB_Packet_t *buffer);
