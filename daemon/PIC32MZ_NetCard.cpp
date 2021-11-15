@@ -6,7 +6,6 @@
  * Created on September 29, 2021
  */
 
-
 #include <string.h>
 #include <sys/ioctl.h>
 #include <sys/socket.h>
@@ -64,8 +63,8 @@ void PIC32MZ_NetCard::send_frame(bool, uint16_t) {
 	for (int i = 0; i < num_buffers; i++) {
 		buffer[i].index = i;
 		memset(buffer[i].buffer, 0, sizeof(buffer[i].buffer));
-		memcpy(buffer[i].buffer, ptr + (i * cols), cols * sizeof(Matrix_RGB_t));
-		memcpy(buffer[i].buffer + 256, ptr + (i * cols) + cols, cols * sizeof(Matrix_RGB_t));
+		for (int j = 0; j < SCALER; j++)
+			memcpy(buffer[i].buffer + (j * 256), ptr + (i * cols * SCALER) + (j * cols), cols * sizeof(Matrix_RGB_t));
 	}
 	
 	libusb_init(&ctx);
