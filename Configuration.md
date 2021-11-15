@@ -22,6 +22,13 @@ The daemon has been modified to support using PIC32MZ NetCard. The same configur
 
 Note the set_brightness method does not work on PIC32MZ NetCard's current USB protocol and firmware. This could be added later on.
 
+### PIC32MZ NetCard Firmware Resolution
+The PIC32MZ NetCard is hard coded currently to support a max chain length of 256. ColorLight 5A-75B supports up to 256x256 and ColorLight 5A-75E supports up to 512x256. The ColorLight 5A-75B has eight connectors while the ColorLight 5A-75E has sixteen connectors, meaning the max panel that can be connected to each connector if using all connectors is 64x128. The normal firmware limits the column size to 1024, and I think the PWM firmware does also. However this is further reduced by PIC32MZ NetCard.
+
+This makes this a little more complicated. However this means that you should configure the receiver card to match the configuration of PIC32MZ NetCard firmware. At that point the workflow is exactly the same. Meaning configuration file rows and columns should match the receiver cards value.
+
+Note the firmware can be updated to increase the row size at some point, see Linux_NetCard's implementation in the daemon for details. Note PIC32MZ_NetCard's implementation maps pixels based on 256 column limits and this is hard coded.
+
 ## Wrapper
 To my knowledge there is no way of converting the panel/cabinet pixel configuration to the desired pixel configuration. This is easily corrected with a mapping function. Currently this requires creating a derived wrapper Matrix class. This requires coding.
 

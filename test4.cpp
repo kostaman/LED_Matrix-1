@@ -19,7 +19,7 @@
 
 class Mapper : public Matrix {
 	public:
-		Mapper() : Matrix(2, 256, 256) { }
+		Mapper() : Matrix(2, 32, 64) { }
 	
 	protected:
 		void map_pixel(uint32_t *x, uint32_t *y) {
@@ -54,8 +54,8 @@ char* time_str(const struct tm *timeptr) {
 
 int main(int argc, char **argv) {
 	Matrix *m = new Mapper();
-	const int rows = 32;
-	const int cols = 128;
+	const int rows = m->get_rows();
+	const int cols = m->get_columns();
 	Matrix_RGB_t buffer[rows][cols];
 	
 	int index = 0;
@@ -115,9 +115,9 @@ int main(int argc, char **argv) {
 				}
 			}
 		}
-		for (int x = 0; x < rows; x++)
-			for (int y = 0; y < cols; y++)
-				m->set_pixel(y, x, buffer[x][y]);
+		for (int x = 0; x < cols; x++)
+			for (int y = 0; y < rows; y++)
+				m->set_pixel(x, y, buffer[y][x]);
 		m->send_frame();
 	}
 
