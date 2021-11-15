@@ -1,0 +1,3 @@
+[submodule "LED_Matrix_PIC32MZ"]
+	path = LED_Matrix_PIC32MZ
+	url = https://github.com/daveythacher/LED_Matrix_PIC32MZ.git
