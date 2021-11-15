@@ -6,7 +6,6 @@
  * Created on September 29, 2021
  */
 
-
 #include <string.h>
 #include <sys/ioctl.h>
 #include <sys/socket.h>
