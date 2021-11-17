@@ -27,12 +27,14 @@ PIC32MZ_NetCard::PIC32MZ_NetCard(uint32_t channel, uint32_t r, uint32_t c) {
 	uint32_t *ptr;
 	char filename[25];
 	
-	rows = r;
-	cols = c;
-	num_buffers = rows / SCALER;
-			
-	if (num_buffers > (ROW / SCALER) || cols > 256)
-		throw -1;
+	// Reducing max size to simplify protocol. (CPU cannot keep up anyhow.)
+	//	Max per 5A-75E receiver is 512x256
+	//	Max per 5A-75B receiver is 256x256
+	//	Max per Ethernet chain is 512x1280
+	//	Max per S2 sender is 1024x1280
+	rows = r % (max_rows + 1);
+	cols = c % (max_cols + 1);
+	send_command(Resize_CMD, rows, cols);
 	
 	snprintf(filename, 25, "/tmp/LED_Matrix-%d.mem", channel);
 	if ((f = open(filename, O_CREAT | O_RDWR, 0666)) < 0)
@@ -52,19 +54,21 @@ PIC32MZ_NetCard::PIC32MZ_NetCard(uint32_t channel, uint32_t r, uint32_t c) {
 	mm = (Matrix_RGB_t *) (ptr + 1);
 }
  
-void PIC32MZ_NetCard::send_frame(bool, uint16_t) {
-	const uint8_t num_threads = std::min(THREADS, num_buffers);
+void PIC32MZ_NetCard::send_frame(bool vlan, uint16_t vlan_id) {
+	const uint32_t num_buffers = (rows * cols) % sizeof(RGB_Packet_t::buffer) ? ((rows * cols) % sizeof(RGB_Packet_t::buffer)) + 1 : (rows * cols) % sizeof(RGB_Packet_t::buffer);
+	const uint32_t num_threads = std::min(THREADS, num_buffers);
+	uint16_t i = 0;
 	Matrix_RGB_t *ptr = mm;
 	thread t[num_threads];
 	RGB_Packet_t buffer[num_buffers];
 	libusb_context *ctx = NULL;
 	libusb_device_handle *handle;
 	
-	for (int i = 0; i < num_buffers; i++) {
+	send_command(VLAN_CMD, vlan ? 1 : 0, vlan_id);
+	for (uint32_t p = rows * cols; p > 0; p -= std::min(p, (uint32_t) sizeof(RGB_Packet_t::buffer))) {
 		buffer[i].index = i;
-		memset(buffer[i].buffer, 0, sizeof(buffer[i].buffer));
-		for (int j = 0; j < SCALER; j++)
-			memcpy(buffer[i].buffer + (j * 256), ptr + (i * cols * SCALER) + (j * cols), cols * sizeof(Matrix_RGB_t));
+		memcpy(buffer[i].buffer, ptr + (i * sizeof(RGB_Packet_t::buffer)), std::min(p, (uint32_t) sizeof(RGB_Packet_t::buffer)));
+		i++;
 	}
 	
 	libusb_init(&ctx);
@@ -105,5 +109,47 @@ void PIC32MZ_NetCard::fill(Matrix_RGB_t pixel) {
 void PIC32MZ_NetCard::clear() {
 	Matrix_RGB_t p;
 	fill(p);
+}
+
+void PIC32MZ_NetCard::set_brightness(uint8_t brightness) {
+	send_command(Brightness_CMD, brightness, 0);
+}
+
+void PIC32MZ_NetCard::send_command(uint16_t cmd, uint16_t arg1, uint16_t arg2) {
+	RGB_Packet_t buffer;
+	uint8_t *ptr = (uint8_t *) buffer.buffer;
+	libusb_context *ctx = NULL;
+	libusb_device_handle *handle;
+	
+	switch(cmd) {
+		case Brightness_CMD:
+			ptr[0] = arg1 & 0xFF;
+			break;
+		case VLAN_CMD:
+			ptr[0] = arg1 & 0xFF;
+			ptr[1] = arg2 & 0xFF;
+			ptr[2] = arg2 >> 8;
+			break;
+		case Resize_CMD:
+			ptr[0] = arg1 & 0xFF;
+			ptr[1] = arg1 >> 8;
+			ptr[2] = arg2 & 0xFF;
+			ptr[3] = arg2 >> 8;
+			break;
+		default:
+			return;
+	};
+	
+	libusb_init(&ctx);
+	handle = libusb_open_device_with_vid_pid(ctx, USB_VENDOR_ID, USB_PRODUCT_ID);
+	if (!handle)
+		return;
+
+	buffer.index = cmd;
+	if (libusb_claim_interface(handle, 0) >= 0)
+		worker(handle, &buffer);
+
+	libusb_close(handle);
+	libusb_exit(ctx);
 }
  
