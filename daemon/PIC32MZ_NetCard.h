@@ -26,7 +26,7 @@ namespace Matrix {
 
 		protected: 
 			const static uint16_t USB_VENDOR_ID = 0x04d8;		// Do not change without updating firmware.
-			const static uint16_t USB_PRODUCT_ID = 0xffff;	// Do not change without updating firmware.
+			const static uint16_t USB_PRODUCT_ID = 0xffff;		// Do not change without updating firmware.
 			const static uint32_t USB_TIMEOUT = 3000;
 			const static uint32_t THREADS = 1;			// Do not change unless working on system like a VM to increase performance.
 			const static uint8_t SCALER = 2;			// Do not change without updating/reworking firmware.
@@ -39,6 +39,7 @@ namespace Matrix {
 			Matrix_RGB_t *mm;
 			uint32_t rows;
 			uint32_t cols;
+			uint8_t brightness;
 
 		private:
 			static void worker(libusb_device_handle *handle, RGB_Packet_t *buffer);
@@ -46,9 +47,6 @@ namespace Matrix {
 				
 			const static uint32_t max_rows = 512;
 			const static uint32_t max_cols = 1280;
-			const static uint16_t Brightness_CMD = 1025;		//  Do not change without updating firmware.
-			const static uint16_t VLAN_CMD = 1026;		//  Do not change without updating firmware.
-			const static uint16_t Resize_CMD = 1027;		//  Do not change without updating firmware.
 	};
 }
 
