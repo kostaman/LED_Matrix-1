@@ -26,6 +26,7 @@ PIC32MZ_NetCard::PIC32MZ_NetCard(uint32_t channel, uint32_t r, uint32_t c) {
 	int f;	
 	uint32_t *ptr;
 	char filename[25];
+	brightness = 100;
 	
 	// Reducing max size to simplify protocol. (CPU cannot keep up anyhow.)
 	//	Max per 5A-75E receiver is 512x256
@@ -54,7 +55,8 @@ PIC32MZ_NetCard::PIC32MZ_NetCard(uint32_t channel, uint32_t r, uint32_t c) {
 }
  
 void PIC32MZ_NetCard::send_frame(bool vlan, uint16_t vlan_id) {
-	const uint32_t num_buffers = (rows * cols) % sizeof(RGB_Packet_t::buffer) ? ((rows * cols) % sizeof(RGB_Packet_t::buffer)) + 1 : (rows * cols) % sizeof(RGB_Packet_t::buffer);
+	const uint32_t size = sizeof(RGB_Packet_t::buffer) / sizeof(Matrix_RGB_t);
+	const uint32_t num_buffers = (rows * cols) % size ? ((rows * cols) / size) + 1 : (rows * cols) / size;
 	const uint32_t num_threads = std::min(THREADS, num_buffers);
 	uint16_t i = 0;
 	Matrix_RGB_t *ptr = mm;
@@ -63,10 +65,12 @@ void PIC32MZ_NetCard::send_frame(bool vlan, uint16_t vlan_id) {
 	libusb_context *ctx = NULL;
 	libusb_device_handle *handle;
 	
+	// TODO: Handle larger than real memory mapping
+	
 	send_cfg(vlan, vlan_id);
-	for (uint32_t p = rows * cols; p > 0; p -= std::min(p, (uint32_t) sizeof(RGB_Packet_t::buffer))) {
+	for (uint32_t p = rows * cols; p > 0; p -= std::min(p, size)) {
 		buffer[i].index = i;
-		memcpy(buffer[i].buffer, ptr + (i * sizeof(RGB_Packet_t::buffer)), std::min(p, (uint32_t) sizeof(RGB_Packet_t::buffer)));
+		memcpy(buffer[i].buffer, ptr + (i * size), std::min(p, size) * sizeof(Matrix_RGB_t));
 		i++;
 	}
 	
