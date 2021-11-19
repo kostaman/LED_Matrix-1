@@ -36,6 +36,11 @@ PIC32MZ_NetCard::PIC32MZ_NetCard(uint32_t channel, uint32_t r, uint32_t c) {
 	rows = r % (max_rows + 1);
 	cols = c % (max_cols + 1);
 	
+	// PIC32MZ Firmware only support 131072 pixels
+	//	Enough for 2 5A-75B or a single 5A-75E
+	if ((rows * cols) > 131072)
+		cols = 131072 / rows;
+	
 	snprintf(filename, 25, "/tmp/LED_Matrix-%d.mem", channel);
 	if ((f = open(filename, O_CREAT | O_RDWR, 0666)) < 0)
 		if ((f = open(filename, O_RDWR, 0666)) < 0)
@@ -64,8 +69,6 @@ void PIC32MZ_NetCard::send_frame(bool vlan, uint16_t vlan_id) {
 	RGB_Packet_t buffer[num_buffers];
 	libusb_context *ctx = NULL;
 	libusb_device_handle *handle;
-	
-	// TODO: Handle larger than real memory mapping
 	
 	send_cfg(vlan, vlan_id);
 	for (uint32_t p = rows * cols; p > 0; p -= std::min(p, size)) {
