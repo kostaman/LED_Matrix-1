@@ -43,7 +43,7 @@ namespace Matrix {
 
 		private:
 			static void worker(libusb_device_handle *handle, RGB_Packet_t *buffer);
-			void send_command(uint16_t cmd, uint16_t arg1, uint16_t arg2);
+			void send_cfg(bool vlan, uint16_t vlan_id);
 				
 			const static uint32_t max_rows = 512;
 			const static uint32_t max_cols = 1280;
