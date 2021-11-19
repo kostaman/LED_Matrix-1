@@ -34,7 +34,6 @@ PIC32MZ_NetCard::PIC32MZ_NetCard(uint32_t channel, uint32_t r, uint32_t c) {
 	//	Max per S2 sender is 1024x1280
 	rows = r % (max_rows + 1);
 	cols = c % (max_cols + 1);
-	send_command(Resize_CMD, rows, cols);
 	
 	snprintf(filename, 25, "/tmp/LED_Matrix-%d.mem", channel);
 	if ((f = open(filename, O_CREAT | O_RDWR, 0666)) < 0)
@@ -64,7 +63,7 @@ void PIC32MZ_NetCard::send_frame(bool vlan, uint16_t vlan_id) {
 	libusb_context *ctx = NULL;
 	libusb_device_handle *handle;
 	
-	send_command(VLAN_CMD, vlan ? 1 : 0, vlan_id);
+	send_cfg(vlan, vlan_id);
 	for (uint32_t p = rows * cols; p > 0; p -= std::min(p, (uint32_t) sizeof(RGB_Packet_t::buffer))) {
 		buffer[i].index = i;
 		memcpy(buffer[i].buffer, ptr + (i * sizeof(RGB_Packet_t::buffer)), std::min(p, (uint32_t) sizeof(RGB_Packet_t::buffer)));
@@ -111,41 +110,31 @@ void PIC32MZ_NetCard::clear() {
 	fill(p);
 }
 
-void PIC32MZ_NetCard::set_brightness(uint8_t brightness) {
-	send_command(Brightness_CMD, brightness, 0);
+void PIC32MZ_NetCard::set_brightness(uint8_t b) {
+	brightness = b;
 }
 
-void PIC32MZ_NetCard::send_command(uint16_t cmd, uint16_t arg1, uint16_t arg2) {
+void PIC32MZ_NetCard::send_cfg(bool vlan, uint16_t id) {
 	RGB_Packet_t buffer;
 	uint8_t *ptr = (uint8_t *) buffer.buffer;
 	libusb_context *ctx = NULL;
 	libusb_device_handle *handle;
 	
-	switch(cmd) {
-		case Brightness_CMD:
-			ptr[0] = arg1 & 0xFF;
-			break;
-		case VLAN_CMD:
-			ptr[0] = arg1 & 0xFF;
-			ptr[1] = arg2 & 0xFF;
-			ptr[2] = arg2 >> 8;
-			break;
-		case Resize_CMD:
-			ptr[0] = arg1 & 0xFF;
-			ptr[1] = arg1 >> 8;
-			ptr[2] = arg2 & 0xFF;
-			ptr[3] = arg2 >> 8;
-			break;
-		default:
-			return;
-	};
+	buffer.index = 1028;
+	ptr[0] = brightness;
+	ptr[1] = vlan ? 1 : 0;
+	ptr[2] = id & 0xFF;
+	ptr[3] = id >> 8;
+	ptr[4] = rows & 0xFF;
+	ptr[5] = rows >> 8;
+	ptr[6] = cols & 0xFF;
+	ptr[7] = cols >> 8;
 	
 	libusb_init(&ctx);
 	handle = libusb_open_device_with_vid_pid(ctx, USB_VENDOR_ID, USB_PRODUCT_ID);
 	if (!handle)
 		return;
 
-	buffer.index = cmd;
 	if (libusb_claim_interface(handle, 0) >= 0)
 		worker(handle, &buffer);
 
