@@ -4,7 +4,7 @@
 ### Mapping
 ### Color Depth
 ## Daemon
-The daemon needs to be configured with a configuration file. Multiple channels are supported now. Each channel requires eight parameters.
+The daemon needs to be configured with a configuration file. Multiple channels are supported now. Each channel requires seven parameters.
 
 Note two threads are used per channel. 
 
