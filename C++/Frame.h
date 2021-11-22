@@ -17,8 +17,8 @@ using std::vector;
 class Frame {
 	public:
 		Frame(uint32_t r = 16, uint32_t c = 128);
-		// TODO: Add copy constructor
- 		// TODO: Add destructor
+		Frame(const Frame &f);
+ 		~Frame();
 			
 		uint32_t get_rows();
 		uint32_t get_columns();

@@ -6,24 +6,38 @@
  * Created on November 19, 2021
  */
  
- #include <algorithm>
- #include <thread>
- #include "Frame.h"
- using std::thread;
+#include <string.h>
+#include <algorithm>
+#include <thread>
+#include "Frame.h"
+using std::thread;
+
+Frame::Frame(uint32_t r, uint32_t c) {
+	rows = r;
+	cols = c;
+	buffer = new Matrix_RGB_t[rows * cols];
+}
+
+Frame::Frame(const Frame &f) {
+	rows = f.rows;
+	cols = f.cols;
+	chans = f.chans;
+	buffer = new Matrix_RGB_t[rows * cols];
+	memcpy(buffer, f.buffer, rows * cols * sizeof(Matrix_RGB_t));
+}
+
+Frame::~Frame() {
+	delete buffer;
+	chans.clear();
+}
  
- Frame::Frame(uint32_t r, uint32_t c) {
- 	rows = r;
- 	cols = c;
- 	buffer = new Matrix_RGB_t[rows * cols];
- }
- 
- uint32_t Frame::get_rows() {
- 	return rows;
- }
- 
- uint32_t Frame::get_columns() {
- 	return cols;
- }
+uint32_t Frame::get_rows() {
+	return rows;
+}
+
+uint32_t Frame::get_columns() {
+	return cols;
+}
  
 void Frame::set_pixel(uint32_t x, uint32_t y, Matrix_RGB_t pixel) {
 	x %= cols;
