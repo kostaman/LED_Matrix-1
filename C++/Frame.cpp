@@ -48,12 +48,14 @@ void Frame::map_channel(Matrix *m, uint32_t x, uint32_t y) {
 }
 
 void Frame::send_frame(uint8_t threads) {
-	threads = std::min(std::min(threads, (uint8_t) 1), (uint8_t) chans.size());
+	threads = std::min(std::max(threads, (uint8_t) 1), (uint8_t) chans.size());
 	thread t[threads];
 
 	for (uint32_t i = 0; i < chans.size(); i += threads) {
-		for (uint8_t j = 0; j < threads; j++)
-			t[j] = thread(worker, &chans[i + j], buffer, cols);
+		for (uint8_t j = 0; j < threads; j++) {
+			MatrixChannel *s = &chans[i + j];
+			t[j] = thread(worker, &chans[i + j], buffer + (s->y * s->x) + s->x, cols);
+		}
 		for (uint8_t j = 0; j < threads; j++)
 			t[j].join();
 	}
