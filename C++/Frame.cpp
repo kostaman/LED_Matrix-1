@@ -54,11 +54,16 @@ void Frame::send_frame(uint8_t threads) {
 	for (uint32_t i = 0; i < chans.size(); i += threads) {
 		for (uint8_t j = 0; j < threads; j++) {
 			MatrixChannel *s = &chans[i + j];
-			t[j] = thread(worker, &chans[i + j], buffer + (s->y * s->x) + s->x, cols);
+			t[j] = thread(worker, &chans[i + j], buffer + (s->y * cols) + s->x, cols);
 		}
 		for (uint8_t j = 0; j < threads; j++)
 			t[j].join();
 	}
+}
+
+void Frame::set_brightness(uint8_t b) {
+	for (uint32_t i = 0; i < chans.size(); i++)
+		chans[i].m->set_brightness(b);
 }
 		
 void Frame::worker(MatrixChannel *c, Matrix_RGB_t *b, uint32_t cols) {
