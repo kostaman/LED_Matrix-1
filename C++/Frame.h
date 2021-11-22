@@ -26,6 +26,7 @@ class Frame {
 		// Note: Use threads with caution, disabled by default
 		//  Threads allows mappers and send_frame of Matrix class to run in parallel
 		void send_frame(uint8_t threads = 0);
+		void set_brightness(uint8_t brightness);
 		
 		// TODO: Improve these - consider thread safe logic
 		// Note: Graphics API is provided by something like OpenGL, QT, Java libs, etc.
