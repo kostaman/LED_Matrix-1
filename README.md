@@ -73,6 +73,10 @@ Demo:
 ```bash
 g++ -O3 C++/Matrix.cpp demo.cpp -o demo
 ```
+Using multiple channels via Frame (C++):
+```bash
+g++ test5.cpp C++/Frame.cpp C++/Matrix.cpp -o test5 -lpthread
+```
 Trigger (C++):
 ```bash
 cd trigger
