@@ -1,9 +1,9 @@
 # Configuration
 ## Limits
-There are limits which restrict the amount of color depth possible in the display. Below are three main categories.
+There are limits which restrict the amount of color depth possible in the display. Color depth can be limited by size, refresh/frame rate, power supply response time, and the LEDs themselves. Below are three main categories.
 
 ### LED Current
-LEDs are diodes and thus have an IV plot which means that for any given forward current there will be a different current. The relationship for is non-linear and usually somewhat exponential. LEDs however will not light below a certain point. This point devices the max color depth possible. 
+LEDs are diodes and thus have an IV plot which means that for any given forward current there will be a different voltage. The relationship for is non-linear and usually somewhat exponential. LEDs however will not light below a certain point. This point devices the max color depth possible. 
 
 Note the IV plot allows reworking the panels to use less power beyond simply lowering the current consumption of the LEDs. Since LEDs need less forward voltage when they use less forward current. This allows optimization of the LED power rail to lower the overall consumption. This does however generally lower the color depth possible.
 
