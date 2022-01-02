@@ -1,8 +1,78 @@
 # Configuration
+## Limits
+There are limits which restrict the amount of color depth possible in the display. Below are three main categories.
+
+### LED Current
+LEDs are diodes and thus have an IV plot which means that for any given forward current there will be a different current. The relationship for is non-linear and usually somewhat exponential. LEDs however will not light below a certain point. This point devices the max color depth possible. 
+
+Note the IV plot allows reworking the panels to use less power beyond simply lowering the current consumption of the LEDs. Since LEDs need less forward voltage when they use less forward current. This allows optimization of the LED power rail to lower the overall consumption. This does however generally lower the color depth possible.
+
+To find the limit you simply forward current of the lowest current LED color, usually Blue. Then find the lowest current the that LED will light at. Take the normal forward current of the that LED and divide it by the min light current. To convert this to PWM bits take log2 of the number.
+
+Note thus far this number assumes no multiplexing and therefore you need to subtract the log2 of the multiplex ratio. This will be the max current division possible, however using a few extra bits may be desired for certain conversion algorithms.
+
+### Serial Bandwidth
+Serial bandwidth can play a siginificant role depending on the control algorithm used. Below are majory categories.
+
+#### non-PWM Drivers:
+These drivers are the most basic of LED drivers and use software PWM and/or BCM. These have some advantages but are generally less effiecent. Below are two major categories for software PWM algorithms.
+
+##### Traditional PWM - 
+The issue with this approach is the any refresh consumes significant amounts of serial bandwidth. This lowers the max color depth against chain length siginificantly. Generally speaking this will likely be a siginficant factor for just about any display beyond a certain point. Log2 of max serial clock divided by refresh, multiplex and columns gives color depth.
+
+Note longer chains will likely need to consider the serial clock speed in order to keep the chain stable. This likely involves stepping back the clock rate which will lower the serial bandwidth available. Refresh generally should be around 100Hz min.
+
+##### S-PWM - 
+This approach solves one of the issues with traditional PWM, however can be a little harder to implement. Full version of this may increase memory consumption, increase processing power requirements and require higher levels of determinism. However this enables serial bandwidth to no longer repeat for every refresh. Instead the refresh becomes the actual FPS needed. This allows the refresh to drop to one. Thus providing a decent acceleration.
+
+Note this works by dividing the PWM period into multiple sections. Each multiplex scan only shifts out one section per pass, thus improving the perceived refresh. When used with a decent amount of color depth it may be recommended to normalize the on time accross the total period rather than doing it on the very first section. Do normalize you generally can use something like a binary tree algorithm. Note this is more resource intensive approach compared to just dividing up traditional PWM which is fairly low resource consumption approach.
+
+#### PWM Drivers:
+These drivers are optimized version of non-PWM drivers. These improve the performance of increases color depth against chain length. However they still struggle with high multiplex applications due to a lack of memory. They work by removing the software PWM and replace it with hardware PWM which removes the excess serial bandwidth consumption. These generally favor high PWM bits and low multiplex just like the LED current reflects, however this is not completely true.
+
+Note these generally implement traditional PWM. Again due to the problem with multiplexing there can be a lot of waste and this can result in lower refreshes. However there are some versions which support S-PWM. There are cases where this is desireable and can lower processing power requirements.
+
+Chain length is likely limited here by color depth. Color depth is not likely a significant limitation due to PWM drivers. These are slightly more expensive compared to non-PWM drivers.
+
+#### PWM Drivers with Memory:
+These drivers are optimized version of PWM drivers. These improve the performance of multiplexing against chain length as they store all information for the whole frame. A state machine is used inside to assit in the multiplexing thus removing excess serial bandwidth consumption. These generally work with S-PWM and therefore due not waste bandwidth on refresh/multiplexing also. However due to memory the FPS can be any number above zero instead of one or higher. 
+
+Chain length can be quite large. Color depth is not likely a significant limitation due to PWM drivers with memory. These are slightly more expensive compared to PWM drivers.
+
+### Power Supply Response Time
+The amount of time it takes to feed the LEDs power can be the difference between the LED lighting and not lightling. Depending on the LED driver the response times required can make the LED drivers deceptive.
+
+Generally speaking the max color depth is log2 of the inverse of the response time divided by multiplex and FPS. Remember FPS is refresh in traditional PWM. This can be a significant limiting factor however getting quality power supplies is not hard. Note wiring and other factors also play a role.
+
+ Below are the two major categories of LED drivers, each has their own requirements based on how the implement color depth.
+
+#### non-PWM Drivers:
+The power supply roughly must be able to respond as fast as the serial clock divided by the number of columns. Slower power supplies may be thinked of as low pass filters which block fast signals and shave off a little on time depending on the configured response time.
+
+Below are two major categories for software PWM alogirthms, each has a slightly different issue created by this.
+
+##### PWM -
+PWM creates a single on time per period, assuming traditional PWM. This makes this most accurate and brightest mode for slower power supplies. If the power supply is slow to respond it will reduce some of the on time to the single edge, which could be the entire on time. The issue with this is the processing power required is fairly intensive.
+
+##### BCM -
+BCM can create multiple on times per period, assuming traditional PWM. This means it can be very inaccurate and dim for slower power supplies. If the power supply is slow it will reduce most or all of the LSBs to the point that they will not exist or contribute. The benefit to this is the processing power required is fairly small. 
+
+#### PWM Drivers:
+The power supply needs to be very fast. The problem with all that effiecency is that it increases the response time. Generally speaking the response time is the grayscale clock.
+
+This gets a little tricky in a few cases below are the two categories.
+
+##### Traditional PWM -
+Here the issue is lowering the grayscale clock lowers the refresh as you spend more time per period. There really is no solution here. You may just wish to let the power supply clip your period and lower your color depth.
+
+##### S-PWM -
+Here the issue is you need to consider the FPS of the serial bandwidth in the grayscale clock against color depth. You have the same issue as traditional PWM where you intentionally increase the grayscale clock to increase the refresh rate.
+
 ## Receiver Card
 ### Configuration
 ### Mapping
 ### Color Depth
+
 ## Daemon
 The daemon needs to be configured with a configuration file. Multiple channels are supported now. Each channel requires seven parameters.
 
