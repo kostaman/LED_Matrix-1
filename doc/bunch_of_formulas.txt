@@ -1,0 +1,97 @@
+CPU:
+Traditional PWM in Software: (Impossible - need accelerator or FPGA)
+cycles = (2 ^ x) * 3 * instructions * pixels * fps
+
+Traditional PWM in Software using BCM: (Usually possible)
+cycles = x * 3 * instructions * pixels * fps
+
+S-PWM/Traditional PWM hybrid version in Software using BCM: (May be possible)
+cycles = x * 6 * instructions * pixels * fps
+
+S-PWM version in Software using BCM: (May be Possible)
+cycles = (2 ^ upper) * lower * 3 * instruction * pixels * fps
+
+S-PWM version in Software: (Impossible - need accelerator or FPGA)
+cycles = (2 ^ x) * 3 * instructions * pixels * fps
+
+Memory:
+Traditional PWM in Software: (Possible)
+memory = (2 ^ x) * word_bytes
+
+Traditional PWM in Software using BCM: (Possible)
+memory = x * word_bytes
+
+S-PWM/Traditional PWM hybrid version in Software using BCM: (Possible)
+memory = x * word_bytes
+
+S-PWM version in Software using BCM: (Possible)
+memory = (2 ^ upper) * lower * word_bytes
+
+S-PWM version in Software: (Possible)
+memory = (2 ^ x) * word_bytes
+
+Memory bandwidth:
+Traditional PWM in Software:  (Impossible - need high determinism (SRAM, FPGA, MCU))
+memory_bandwdith = SCLK * word_bytes
+
+Traditional PWM in Software using BCM: (Possible)
+memory_bandwdith = SCLK / ((2 ^ x) / x) * word_bytes
+
+S-PWM/Traditional PWM hybrid version in Software using BCM: (May be possible)
+memory_bandwdith = SCLK / ((2 ^ (x - lower)) + lower) * word_bytes
+
+S-PWM version in Software using BCM: (May be possible)
+memory_bandwdith = SCLK / ((2 ^ upper) * lower) * word_bytes
+
+S-PWM version in Software: (Impossible - need high determinism (SRAM, FPGA, MCU))
+memory_bandwdith = SCLK * word_bytes
+
+Chain length: (Pixels = length * multiplex * 2 * connectors)
+Traditional PWM with standard drivers: (Short Chains)
+length = SCLK / (refresh * multiplex * 2^x) - (refresh > 100)
+
+Traditional PWM with standard drivers and BCM: (Short Chains)
+length = SCLK / (refresh * multiplex * 2^x) - (refresh > 100)
+
+S-PWM with standard drivers: (Medium Chains)
+length = SCLK / (fps * multiplex * 2^x) - (FPS > 1)
+
+Traditional PWM with PWM drivers: (Medium Chains)
+length = SCLK / (refresh * multiplex * 16) - (refresh > 100)
+
+S-PWM with MM drivers: (Chains so long it can cause problems)
+length = SCLK / (fps * multiplex * 16) - (FPS > 0)
+
+Refresh: (High multiplex lowers pwm bit count)
+Traditional PWM: (Poor scaling)
+refresh = SCLK / (cols * multiplex * 2^x)
+
+Traditional PWM with PWM drivers: (Low Scaling)
+refresh = SCLK / (cols * multiplex * 16) - (GCLK >= (refresh * 2^x * multiplex)
+
+S-PWM with standard drivers: (Decent Scaling)
+refresh = FPS * 2^upper
+
+S-PWM with PWM/MM drivers: (Good Scaling)
+refresh = FPS * 2^upper - (GCLK >= (FPS * 2^(upper + lower) * multiplex)
+
+Transient:
+Standard drivers: (Not usually a problem)
+transient = 1/(SCLK / cols)
+
+PWM/MM drivers: (Problem - requires decent understanding)
+transient = 1/GCLK
+
+Accuracy:
+BCM: (Can be a problem - requires decent understanding)
+accuracy = (((2 ^ x) * period) - ((x / 2) * transient)) / ((2 ^ x) * period) - (period = 1/SCLK)
+
+PWM: (Not usually a problem)
+accuracy = (((2 ^ x) * period) - transient) / ((2 ^ x) * period) - (period = 1/SCLK or 1/GCLK)
+
+PWM Bits:
+LED Current: (11-13 max usually for single scan)
+pwm_bits = log2(Forward - min) - log2(multiplex)
+
+PSU response: (Depends)
+pwm_bits = log2(transient / (multiplex * fps))
