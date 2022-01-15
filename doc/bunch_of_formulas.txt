@@ -5,9 +5,6 @@ cycles = (2 ^ x) * 3 * instructions * pixels * fps
 Traditional PWM in Software using BCM: (Usually possible)
 cycles = x * 3 * instructions * pixels * fps
 
-S-PWM/Traditional PWM hybrid version in Software using BCM: (May be possible)
-cycles = x * 6 * instructions * pixels * fps
-
 S-PWM version in Software using BCM: (May be Possible)
 cycles = (2 ^ upper) * lower * 3 * instruction * pixels * fps
 
@@ -19,9 +16,6 @@ Traditional PWM in Software: (Possible)
 memory = (2 ^ x) * word_bytes
 
 Traditional PWM in Software using BCM: (Possible)
-memory = x * word_bytes
-
-S-PWM/Traditional PWM hybrid version in Software using BCM: (Possible)
 memory = x * word_bytes
 
 S-PWM version in Software using BCM: (Possible)
@@ -36,9 +30,6 @@ memory_bandwdith = SCLK * word_bytes
 
 Traditional PWM in Software using BCM: (Possible)
 memory_bandwdith = SCLK / ((2 ^ x) / x) * word_bytes
-
-S-PWM/Traditional PWM hybrid version in Software using BCM: (May be possible)
-memory_bandwdith = SCLK / ((2 ^ (x - lower)) + lower) * word_bytes
 
 S-PWM version in Software using BCM: (May be possible)
 memory_bandwdith = SCLK / ((2 ^ upper) * lower) * word_bytes
