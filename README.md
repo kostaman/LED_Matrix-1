@@ -40,6 +40,8 @@ A hardware module could be build which replaces the S2 sender card, however this
 
 A working version of this hardware module is available in [LED_Matrix_PIC32MZ](https://github.com/daveythacher/LED_Matrix_PIC32MZ). This works as a sync sender card. Effort was made to control the timing of the packets so that it would not cause issues. These level of control is much harder, if even possible, in this code base.
 
+It is potentially possible to replace the LED_Matrix_PIC32MZ logic with a BeagleBone Black's processor, AM335x. This may work without needing an external gigabit Ethernet switch. This would end up being cheaper than Raspberry Pi solution more than likely. Note the AM335x would still need to be external server in POE use cases. AM335x's RGMII would need to be used for the LED panels, while another Ethernet would be needed for application logic. This could be on USB. Coding this correctly is more involved.
+
 ## About
 This logic works off shared memory map created by daemon. This enables other languages on the system to use the logic without inheriting/requiring super user. Shared memory map is creating in /tmp and is assumed to be a RAM disk or something like it. (This may not be desirable for every use case.)
 
